@@ -282,6 +282,32 @@ footer.foot { display:flex; justify-content:space-between; align-items:center; g
   color:var(--on-surface-variant); font-size:13px; line-height:18px; }
 footer.foot p { margin:0; max-width:64ch; }
 
+/* speedrun route */
+.steps { list-style:none; margin:0; padding:0; }
+.step { display:grid; grid-template-columns:32px minmax(0,1fr) auto; gap:14px; align-items:start; padding:14px 16px; }
+.step + .step { box-shadow:inset 0 1px 0 var(--surface-high); }
+.step .k { width:32px; height:32px; border-radius:var(--r-m); background:var(--secondary-container); color:var(--on-secondary-container);
+  display:grid; place-items:center; font-weight:650; font-size:14px; font-variant-numeric:tabular-nums;
+  transition:border-radius 450ms var(--spring), background-color 200ms var(--effects); }
+.step.done .k { background:var(--primary); color:var(--on-primary); border-radius:50%; }
+.step .what { font-weight:560; font-size:16px; line-height:22px; }
+.step.done .what { color:var(--on-surface-variant); text-decoration:line-through; text-decoration-thickness:1px; }
+.step .why { font-size:14px; line-height:20px; color:var(--on-surface-variant); margin-top:3px; max-width:78ch; }
+.step .when { font-size:13px; font-weight:600; color:var(--primary); margin-bottom:2px; }
+.wk { margin-top:22px; }
+.wk:first-of-type { margin-top:0; }
+.wk-h { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:0 4px 8px; }
+.wk-h b { font-size:16px; font-weight:620; }
+.wk-h span { font-size:14px; color:var(--on-surface-variant); font-variant-numeric:tabular-nums; }
+.sum-strip { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); background:var(--surface-lowest); border-radius:var(--r-l); margin-bottom:20px; }
+.sum-strip > div { padding:14px 18px; }
+.sum-strip > div + div { box-shadow:inset 1px 0 0 var(--surface-high); }
+.sum-strip .lab { font-size:14px; color:var(--on-surface-variant); }
+.sum-strip .val { font-size:24px; line-height:32px; font-weight:450; font-variant-numeric:tabular-nums; }
+.sum-strip .val.lead { font-size:30px; font-weight:560; }
+@media (max-width: 599px) { .sum-strip { grid-template-columns:1fr 1fr; } .sum-strip > div:nth-child(3) { box-shadow:inset 0 1px 0 var(--surface-high); } .sum-strip > div:nth-child(4) { box-shadow:inset 1px 0 0 var(--surface-high), inset 0 1px 0 var(--surface-high); }
+  .step { grid-template-columns:28px minmax(0,1fr); } .step > :last-child { grid-column:2; } }
+
 /* tab content transition */
 .view { animation:viewIn 420ms var(--emph-decel) both; }
 @keyframes viewIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
@@ -316,7 +342,7 @@ footer.foot p { margin:0; max-width:64ch; }
 @media (max-width: 599px) {
   .app { grid-template-columns:1fr; }
   .rail { position:fixed; top:auto; bottom:0; left:0; right:0; height:auto; z-index:20; flex-direction:row; justify-content:space-around;
-    padding:10px 4px calc(10px + env(safe-area-inset-bottom)); background:var(--surface-c); gap:0; }
+    padding:10px 10px calc(10px + env(safe-area-inset-bottom)); background:var(--surface-c); gap:0; }
   .brand, .rail-foot { display:none; }
   .navbtn { flex:1; }
   main { padding:20px 16px 120px; }
@@ -345,7 +371,8 @@ footer.foot p { margin:0; max-width:64ch; }
       <div class="brand-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 14q4.5-7 9 0t9 0" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg></div>
       <div><b>CNE Speedrun</b><span>WGU B.S. Cloud &amp; Network Eng.</span></div>
     </div>
-    <button class="navbtn" data-tab="plan"><span class="ind"></span><span class="ms" aria-hidden="true">space_dashboard</span><span>My plan</span></button>
+    <button class="navbtn" data-tab="plan"><span class="ind"></span><span class="ms" aria-hidden="true">space_dashboard</span><span class="lbl-full">My plan</span><span class="lbl-short" aria-hidden="true">Plan</span></button>
+    <button class="navbtn" data-tab="speed"><span class="ind"></span><span class="ms" aria-hidden="true">bolt</span><span>Speedrun</span></button>
     <button class="navbtn" data-tab="courses"><span class="ind"></span><span class="ms" aria-hidden="true">checklist</span><span>Courses</span></button>
     <button class="navbtn" data-tab="creds"><span class="ind"></span><span class="ms" aria-hidden="true">workspace_premium</span><span class="lbl-full">Credentials</span><span class="lbl-short" aria-hidden="true">Certs</span></button>
     <button class="navbtn" data-tab="sophia"><span class="ind"></span><span class="ms" aria-hidden="true">school</span><span>Sophia</span></button>
@@ -363,7 +390,7 @@ footer.foot p { margin:0; max-width:64ch; }
             <p id="subline"></p>
           </div>
           <div class="actions">
-            <button class="btn filled" data-goto="courses"><span class="ms" aria-hidden="true">checklist</span>See what's left</button>
+            <button class="btn filled" data-goto="speed"><span class="ms" aria-hidden="true">bolt</span>Speedrun route</button>
             <button class="btn tonal" data-goto="sophia">Sophia plan</button>
           </div>
         </header>
@@ -389,14 +416,13 @@ footer.foot p { margin:0; max-width:64ch; }
             <div class="big num" id="finish"></div>
             <div class="muted small" id="finishSub"></div>
             <dl class="kv" id="calc"></dl>
-            <div class="cbg" id="paceSeg" role="group" aria-label="Pace">
-              <button data-pace="6"><span class="ms" aria-hidden="true">check</span>Chill</button>
-              <button data-pace="10"><span class="ms" aria-hidden="true">check</span>Steady</button>
-              <button data-pace="18"><span class="ms" aria-hidden="true">check</span>Speedrun</button>
+            <div class="cbg targetSeg" role="group" aria-label="Finish target">
+              <button data-target="2"><span class="ms" aria-hidden="true">check</span>2 months</button>
+              <button data-target="3"><span class="ms" aria-hidden="true">check</span>3 months</button>
+              <button data-target="6"><span class="ms" aria-hidden="true">check</span>1 term</button>
             </div>
             <div class="ctl-row">
-              <label class="field">Start date<input type="date" id="startDate"></label>
-              <label class="field">Credits a month<input type="number" id="pace" min="1" max="60"></label>
+              <label class="field">WGU start date<input type="date" id="startDate"></label>
             </div>
             <label class="switch"><span>Count planned Sophia</span><input type="checkbox" id="useSophia"><span class="track"><span class="thumb"></span></span></label>
           </div>
@@ -405,6 +431,26 @@ footer.foot p { margin:0; max-width:64ch; }
             <div class="panel-head"><h2>Do these first</h2></div>
             <div class="todo-list" id="alerts"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ======================= SPEEDRUN ======================= -->
+      <section id="tab-speed" class="view" hidden>
+        <header class="pagehead">
+          <div>
+            <h1 id="speedHead"></h1>
+            <p id="speedSub"></p>
+          </div>
+          <div class="cbg targetSeg" role="group" aria-label="Finish target">
+            <button data-target="2"><span class="ms" aria-hidden="true">check</span>2 months</button>
+            <button data-target="3"><span class="ms" aria-hidden="true">check</span>3 months</button>
+            <button data-target="6"><span class="ms" aria-hidden="true">check</span>1 term</button>
+          </div>
+        </header>
+        <div class="grid">
+          <div class="panel s12" id="speedPre"></div>
+          <div class="panel s12" id="speedWgu"></div>
+          <div class="panel s12 prose" id="speedRules"></div>
         </div>
       </section>
 
@@ -498,7 +544,7 @@ const TRACKS = {
 const COURSES = [
   { id:"introit",  t:"Introduction to IT",                       area:"IT Core", tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:["s-introit"], conf:"confirmed" },
   { id:"bizit",    t:"Business of IT - Applications",            area:"IT Core", cert:"ITIL Foundation", tr:{general:[4,1],azure:[4,1],aws:[4,1],cisco:[4,1]}, sat:["itil"], conf:"verify" },
-  { id:"ethics",   t:"Ethics in Technology",                     area:"Gen Ed",  tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:[] },
+  { id:"ethics",   t:"Ethics in Technology",                     area:"Gen Ed",  tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:[], alt:"Study.com Philosophy 104" },
   { id:"techcomm", t:"Technical Communication",                  area:"Gen Ed",  tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:[], sophia:"BUSI1025" },
   { id:"linux",    t:"Linux Foundations",                        area:"IT Core", cert:"LPI Linux Essentials", tr:{general:[3,2],azure:[3,2],aws:[3,2],cisco:[3,2]}, sat:["lpi-le"], conf:"likely" },
   { id:"itf",      t:"IT Foundations",                           area:"IT Core", cert:"CompTIA A+ Core 1", tr:{general:[4,2],azure:[4,2],aws:[4,2],cisco:[4,2]}, sat:["aplus"], conf:"likely" },
@@ -574,8 +620,9 @@ const CONF_PILL = { confirmed:["p-good","confirmed"], likely:["p-acc","likely"],
    STATE (localStorage)
    ============================================================== */
 const KEY = "cne-speedrun-v1";
-const DEFAULTS = { track:"general", start:"2027-01-01", pace:10, useSophia:1, status:{}, sophiaPlan:{}, tab:"plan" };
+const DEFAULTS = { track:"general", start:"2027-01-01", pace:10, target:3, useSophia:1, status:{}, sophiaPlan:{}, steps:{}, tab:"plan" };
 let S = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}"));
+S.steps = S.steps || {}; S.target = S.target || 3;
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
 
 /* ==============================================================
@@ -608,7 +655,7 @@ function autoStatus(c) {
 }
 function statusOf(c) {
   if (S.status[c.id]) return { s:S.status[c.id], manual:true, by:autoStatus(c).by };
-  if (c.sophia && S.sophiaPlan[c.id]) return { s:"sophia" };
+  if ((c.sophia || c.alt) && S.sophiaPlan[c.id]) return { s:"sophia" };
   return autoStatus(c);
 }
 function tally(track) {
@@ -639,10 +686,10 @@ function renderTrackSeg() {
 function calcFor(track) {
   const t = tally(track), remaining = t.total - t.done;
   const wguCUs = Math.max(0, remaining - (S.useSophia ? t.sophia : 0));
-  const months = Math.max(1, Math.ceil(wguCUs / S.pace));
+  const months = +S.target || 3;
   const terms = Math.max(1, Math.ceil(months / 6));
   const finish = new Date(S.start + "T00:00"); finish.setMonth(finish.getMonth() + months);
-  return { t, remaining, wguCUs, months, terms, finish, cost: terms * TUITION };
+  return { t, remaining, wguCUs, months, terms, finish, cost: terms * TUITION, perMonth: Math.ceil(wguCUs / months), perWeek: Math.ceil(wguCUs / (months * 4.345)) };
 }
 
 function renderPlan() {
@@ -650,7 +697,7 @@ function renderPlan() {
   const rest = tot - t.done - t.sophia - t.prog;
 
   $("#headline").innerHTML = `${t.done} <span class="of">of</span> ${tot} <span class="of">credits done</span>`;
-  $("#subline").innerHTML = `${TRACKS[S.track].name} track, ${Math.round(t.done/tot*100)}% complete. At ${S.pace} credits a month you finish around <b>${fmt(c.finish)}</b>, in ${c.terms} term${c.terms>1?"s":""}.`;
+  $("#subline").innerHTML = `${TRACKS[S.track].name} track, ${Math.round(t.done/tot*100)}% complete. Speedrun target: done by <b>${fmt(c.finish)}</b> in ${c.terms} term${c.terms>1?"s":""} for $${c.cost.toLocaleString()}.`;
 
   $("#pDone").style.flexBasis = pct(t.done, tot);
   $("#pSoph").style.flexBasis = pct(t.sophia + t.prog, tot);
@@ -674,14 +721,15 @@ function renderPlan() {
     <div class="n">${g.list.length} course${g.list.length>1?"s":""}</div><div class="cu2">${g.list.reduce((x,co)=>x+co.cu,0)} CU</div></div>`).join("");
 
   $("#finish").textContent = fmt(c.finish);
-  $("#finishSub").textContent = `${c.months} months from ${new Date(S.start + "T00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}`;
+  $("#finishSub").textContent = `${c.months} months from a ${new Date(S.start + "T00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})} start`;
   $("#calc").innerHTML = `
     <dt>Credits to do at WGU</dt><dd>${c.wguCUs}</dd>
+    <dt>Pace needed</dt><dd>${c.perWeek} CU a week</dd>
     <dt>Terms</dt><dd>${c.terms}</dd>
     <dt>Tuition at $${TUITION.toLocaleString()} a term</dt><dd>$${c.cost.toLocaleString()}</dd>`;
 
-  document.querySelectorAll("#paceSeg button").forEach(b => { const on = +b.dataset.pace === +S.pace; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
-  $("#startDate").value = S.start; $("#pace").value = S.pace; $("#useSophia").checked = !!+S.useSophia;
+  document.querySelectorAll(".targetSeg button").forEach(b => { const on = +b.dataset.target === +S.target; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+  $("#startDate").value = S.start; $("#useSophia").checked = !!+S.useSophia;
   renderAlerts();
 }
 
@@ -706,6 +754,7 @@ function renderAlerts() {
 function statusSelect(c, st) {
   const opts = [["todo","To do"],["progress","In progress"],["done","Passed at WGU"],["transfer","Transferred"]];
   if (c.sophia) opts.splice(1,0,["sophia","Planned Sophia"]);
+  else if (c.alt) opts.splice(1,0,["sophia","Planned outside"]);
   return `<select class="st" data-course="${c.id}" aria-label="Status for ${c.t}">` +
     opts.map(([v,l]) => `<option value="${v}" ${st.s===v?"selected":""}>${l}</option>`).join("") +
     (S.status[c.id] ? `<option value="__auto">Reset to automatic</option>` : "") + `</select>`;
@@ -813,9 +862,126 @@ function renderCompare() {
     <p><b>AWS</b> only matches if you renew Cloud Practitioner. <b>Cisco</b> drops your Network+ and Security+ credit and adds three 6 CU courses, so it's the slowest for you.</p>`;
 }
 
+/* Fastest-first order for the WGU queue: material you already know, short
+   courses, then prerequisite chains (Python before automation), capstone last. */
+const SPEED_ORDER = ["itf","itapps","vc","bizit","linux","networks","netseca","cloudapps","netan","telecomm","virt","cnsm",
+  "ethics","systems","techcomm","comp","physsci","hfw","algebra","ushist","visual","itlead","introit","stats","datamgmt","netsecf",
+  "azfund","awsfound","ccna","cyberops","python","pyauto","sdn","netauto","devnet","iot","ai","hybrid","azplat","azarch","awsarch","awsops","capstone"];
+const WHY = {
+  itf:"A+ Core 1 objectives. You have run IT for 10 years; book the exam in week one.",
+  itapps:"A+ Core 2. Same exam family; take it right after Core 1 while the format is fresh.",
+  vc:"1 CU of Git basics. You ship code already; an afternoon.",
+  netan:"Network+ and Server+ cover most of it.",
+  telecomm:"Wireless and telecom concepts from Network+.",
+  virt:"Your VCP-DCV covers the hypervisor side.",
+  cnsm:"Security+, Cloud+ and ISC2 CC cover the models.",
+  ethics:"Short gen ed. Clear it fast at WGU, or before you start via Study.com Philosophy 104.",
+  systems:"Gen ed with no outside option. Do it early as a break from the technical exams.",
+  python:"Your Node and React experience transfers; mostly syntax.",
+  pyauto:"WGU only. Script things you already automate at work.",
+  sdn:"Builds on Networks; do it after the Python courses.",
+  netauto:"WGU only. Pairs with Python for IT Automation; do it straight after.",
+  iot:"Infrastructure concepts; your hybrid work covers much of it.",
+  ai:"You run production MCP and agent infrastructure; use it as material.",
+  hybrid:"WGU only. Entra ID and Azure hybrid work map onto it.",
+  capstone:"WGU only, and last. Write up a real project from work so it's documentation, not a new build.",
+};
+const DAY = 864e5;
+const fmtDay = d => d.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+
+function renderSpeed() {
+  const list = coursesFor(S.track);
+  const isDone = c => { const s = statusOf(c).s; return s === "transfer" || s === "done"; };
+  const start = new Date(S.start + "T00:00"), today = new Date(); today.setHours(0,0,0,0);
+  const daysToStart = Math.round((start - today) / DAY);
+
+  // Before day one: outside courses that clear WGU courses
+  const inProg = c => c.sat.some(id => credById(id)?.inProgress);
+  const pre = list.filter(c => !isDone(c) && (c.sophia || (c.alt && S.sophiaPlan[c.id])))
+    .sort((a,b) => inProg(b) - inProg(a));
+  const preCU = pre.reduce((a,c) => a + c.cu, 0);
+  // At WGU: everything else not done
+  const wgu = list.filter(c => !isDone(c) && !pre.includes(c))
+    .sort((a,b) => SPEED_ORDER.indexOf(a.id) - SPEED_ORDER.indexOf(b.id));
+  const wguCU = wgu.reduce((a,c) => a + c.cu, 0);
+  const done = list.filter(isDone).reduce((a,c) => a + c.cu, 0);
+  console.assert(done + preCU + wguCU === list.reduce((a,c)=>a+c.cu,0), "speedrun buckets must sum to total");
+
+  const months = +S.target || 3, weeks = Math.round(months * 4.345);
+  const finish = new Date(start); finish.setMonth(finish.getMonth() + months);
+  const perWeek = wguCU / weeks;
+
+  $("#speedHead").textContent = `Done by ${fmt(finish)}`;
+  $("#speedSub").innerHTML = `${TRACKS[S.track].name} track. Clear ${pre.length} course${pre.length===1?"":"s"} (${preCU} CU) before your ${fmtDay(start)} start, then ${wgu.length} at WGU (${wguCU} CU) in ${weeks} weeks: about <b>${perWeek.toFixed(1)} CU a week</b>, one term, $${TUITION.toLocaleString()}.`;
+  const generalLeft = coursesFor("general").filter(c => !isDone(c)).reduce((a,c)=>a+c.cu,0);
+  const thisLeft = list.filter(c => !isDone(c)).reduce((a,c)=>a+c.cu,0);
+  const trackNote = S.track !== "general" && thisLeft > generalLeft
+    ? `<p class="small" style="margin:0 4px 16px"><b>Fastest track is General:</b> ${thisLeft - generalLeft} CU less than ${TRACKS[S.track].name} for you. <button class="btn text" data-track="general" style="height:32px">Switch to General</button></p>` : "";
+
+  // ---- Before day one ----
+  let n = 0;
+  const stepRow = (key, what, why, when, control) => {
+    n++;
+    const d = control ? false : !!S.steps[key];
+    return `<li class="step ${d?"done":""}"><div class="k">${d ? `<span class="ms" aria-hidden="true" style="font-size:18px">check</span>` : n}</div>
+      <div>${when?`<div class="when">${when}</div>`:""}<div class="what">${what}</div><div class="why">${why}</div></div>
+      <div>${control || `<label class="checkbox"><input type="checkbox" data-step="${key}" ${d?"checked":""}>Done</label>`}</div></li>`;
+  };
+  const perCourseDays = pre.length ? Math.floor(Math.max(0, daysToStart - 14) / pre.length) : 0;
+  let preHtml = stepRow("eval", `Request a ${TRACKS[S.track].code} transfer evaluation`,
+    `Ask your Enrollment Counselor to re-evaluate you for this program, and send official transcripts: CompTIA, LPI, PeopleCert (ITIL), Sophia, and anything on Credly. Credit only applies if it's on the evaluation before your first term starts.`, "This week");
+  preHtml += pre.map(c => {
+    const ip = c.sat.some(id => credById(id)?.inProgress);
+    return stepRow("c-" + c.id, c.sophia ? `Sophia: ${c.sophia}` : c.alt, `Clears <b>${c.t}</b> (${c.cu} CU).${ip ? " You're already taking it." : ""}`, ip ? "In progress" : "",
+      `<label class="checkbox"><input type="checkbox" data-finish="${c.id}">Passed</label>`);
+  }).join("");
+  if (!S.sophiaPlan.ethics && !isDone(list.find(c=>c.id==="ethics") || {sat:[]}) && list.some(c=>c.id==="ethics"))
+    preHtml += stepRow("ethics-opt", "Optional: Study.com Philosophy 104", `Clears <b>Ethics in Technology</b> (3 CU) before you start. Sophia has no course for it. Skip this if you'd rather take it at WGU.`, "",
+      `<button class="btn tonal" data-plan-alt="ethics" style="height:36px;padding:0 14px">Add to route</button>`);
+  preHtml += stepRow("transcript", "Send the final Sophia transcript", `After your last Sophia course, have Sophia send WGU an official transcript and confirm the evaluation updated. Leave about two weeks before your start date for this.`, daysToStart > 14 ? `By ${fmtDay(new Date(start - 14*DAY))}` : "");
+  preHtml += stepRow("start", `Start your first term on ${fmtDay(start)}`, `WGU terms start on the 1st of a month and cost the same however much you finish. Change the date on My plan if you need more time for Sophia.`, "");
+  $("#speedPre").innerHTML = `<div class="panel-head"><h2>Before day one</h2><span class="muted small num">${daysToStart > 0 ? `${daysToStart} days until ${fmtDay(start)}${pre.length ? `, about ${perCourseDays} days per course with a 2-week buffer` : ""}` : "Your start date has passed; update it on My plan"}</span></div>
+    ${trackNote}<ol class="steps rows">${preHtml}</ol>`;
+
+  // ---- At WGU, week by week ----
+  let cum = 0; const byWeek = new Map();
+  wgu.forEach(c => {
+    cum += c.cu;
+    const w = c.id === "capstone" ? weeks : Math.max(1, Math.min(weeks, Math.ceil(cum / wguCU * weeks)));
+    if (!byWeek.has(w)) byWeek.set(w, []);
+    byWeek.get(w).push(c);
+  });
+  let k = 0;
+  const wguHtml = [...byWeek.entries()].map(([w, cs]) => {
+    const end = new Date(start.getTime() + w * 7 * DAY - DAY);
+    const cu = cs.reduce((a,c)=>a+c.cu,0);
+    return `<div class="wk"><div class="wk-h"><b>Done by week ${w}</b><span>${fmtDay(end)} · ${cu} CU</span></div><ol class="steps rows">` +
+      cs.map(c => { k++; const st = statusOf(c).s;
+        return `<li class="step"><div class="k">${k}</div><div><div class="what">${c.t} <span class="muted num" style="font-weight:400">· ${c.cu} CU</span></div>
+          <div class="why">${WHY[c.id] || (c.cert ? `Earns ${c.cert}.` : "")}${c.wguOnly ? "" : ""}</div></div>
+          <div><label class="checkbox"><input type="checkbox" data-pass="${c.id}" ${st==="done"?"checked":""}>Passed</label></div></li>`; }).join("") +
+      `</ol></div>`;
+  }).join("");
+  $("#speedWgu").innerHTML = `<div class="panel-head"><h2>At WGU, in this order</h2></div>
+    <div class="sum-strip">
+      <div><div class="lab">Already done</div><div class="val">${done} CU</div></div>
+      <div><div class="lab">Before day one</div><div class="val">${preCU} CU</div></div>
+      <div><div class="lab">At WGU</div><div class="val lead">${wguCU} CU</div></div>
+      <div><div class="lab">Pace</div><div class="val">${perWeek.toFixed(1)} CU/wk</div></div>
+    </div>
+    ${wgu.length ? wguHtml : `<p class="muted">Nothing left at WGU. Request graduation.</p>`}`;
+
+  $("#speedRules").innerHTML = `<h2 style="margin-bottom:12px">Rules that keep it fast</h2>
+    <p><b>Tell your Program Mentor on day one that you're accelerating.</b> Ask them to add the next course the moment you pass one, so you never wait on enrollment. Only the first term's minimum is required; the rest is up to your pace.</p>
+    <p><b>Exam courses first, projects in parallel.</b> When a course is graded by a written project, submit it, then start studying the next exam while evaluators grade it.</p>
+    <p><b>Use the pre-assessment as your gate.</b> Take it first; if you pass comfortably, schedule the real exam right away and only study what it showed you missed.</p>
+    <p><b>Clear the A+ courses in week one.</b> The vouchers are in tuition and it's the material you know best, so it's ${["itf","itapps"].filter(id=>wgu.some(c=>c.id===id)).length ? "8 CU of quick momentum" : "already handled"}.</p>
+    <p><b>Leave the capstone last but plan it early.</b> Pick a real work project now (Entra Conditional Access or your MCP infrastructure) and keep notes as you go.</p>`;
+}
+
 let lastTab = null;
 function renderAll() {
-  renderTrackSeg(); renderPlan(); renderCourses(); renderCreds(); renderSophia(); renderCompare();
+  renderTrackSeg(); renderPlan(); renderSpeed(); renderCourses(); renderCreds(); renderSophia(); renderCompare();
   document.querySelectorAll("#tabs .navbtn").forEach(b => { const on = b.dataset.tab === S.tab; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   document.querySelectorAll("main section").forEach(s => {
     const show = s.id === "tab-" + S.tab;
@@ -829,7 +995,7 @@ function renderAll() {
    EVENTS
    ============================================================== */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-track],[data-pace],[data-pick],[data-goto],[data-filter]");
+  const t = e.target.closest("[data-tab],[data-track],[data-pace],[data-pick],[data-goto],[data-filter],[data-target],[data-plan-alt]");
   if (!t) return;
   if (t.dataset.tab) S.tab = t.dataset.tab;
   if (t.dataset.goto) { S.tab = t.dataset.goto; if (t.dataset.goto === "courses") S.filter = "todo"; window.scrollTo({ top:0 }); }
@@ -837,6 +1003,8 @@ document.addEventListener("click", e => {
   if (t.dataset.track) S.track = t.dataset.track;
   if (t.dataset.pick) S.track = t.dataset.pick;
   if (t.dataset.pace) S.pace = +t.dataset.pace;
+  if (t.dataset.target) S.target = +t.dataset.target;
+  if (t.dataset.planAlt) S.sophiaPlan[t.dataset.planAlt] = true;
   save(); renderAll();
 });
 document.addEventListener("keydown", e => {
@@ -847,6 +1015,9 @@ document.addEventListener("change", e => {
   const t = e.target;
   if (t.matches(".st")) { if (t.value === "__auto") delete S.status[t.dataset.course]; else S.status[t.dataset.course] = t.value; }
   else if (t.dataset.sophia) S.sophiaPlan[t.dataset.sophia] = t.checked;
+  else if (t.dataset.step) S.steps[t.dataset.step] = t.checked;
+  else if (t.dataset.finish) { if (t.checked) S.status[t.dataset.finish] = "transfer"; }
+  else if (t.dataset.pass) { if (t.checked) S.status[t.dataset.pass] = "done"; else delete S.status[t.dataset.pass]; }
   else if (t.id === "startDate" && t.value) S.start = t.value;
   else if (t.id === "pace") S.pace = Math.max(1, +t.value || 1);
   else if (t.id === "useSophia") S.useSophia = t.checked ? 1 : 0;
@@ -860,10 +1031,10 @@ $("#backupBtn").onclick = async () => {
 };
 $("#restoreBtn").onclick = () => {
   const txt = prompt("Paste your backup code:"); if (!txt) return;
-  try { S = Object.assign({}, DEFAULTS, JSON.parse(decodeURIComponent(escape(atob(txt.trim()))))); save(); renderAll(); }
+  try { S = Object.assign({}, DEFAULTS, JSON.parse(decodeURIComponent(escape(atob(txt.trim()))))); S.steps = S.steps || {}; save(); renderAll(); }
   catch { alert("That backup code didn't work."); }
 };
-$("#resetBtn").onclick = () => { if (confirm("Reset all progress and settings?")) { S = { ...DEFAULTS, status:{}, sophiaPlan:{} }; save(); renderAll(); } };
+$("#resetBtn").onclick = () => { if (confirm("Reset all progress and settings?")) { S = { ...DEFAULTS, status:{}, sophiaPlan:{}, steps:{} }; save(); renderAll(); } };
 
 renderAll();
 </script>
