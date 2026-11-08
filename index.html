@@ -351,6 +351,13 @@ footer.foot p { margin:0; max-width:64ch; }
   .course { grid-template-columns:40px minmax(0,1fr); }
   .course > :last-child { grid-column:2; }
   .src { grid-template-columns:minmax(0,1fr) auto; } .src .n { display:none; }
+  table.stack, table.stack tbody, table.stack tr, table.stack td { display:block; width:100%; }
+  table.stack tr:first-child { display:none; }
+  table.stack tr { padding:10px 0; box-shadow:inset 0 1px 0 var(--surface-high); }
+  table.stack td { box-shadow:none; padding:3px 16px; text-align:left; white-space:normal; }
+  table.stack td.r { text-align:left; }
+  table.stack td[colspan] { padding-top:14px; }
+  table.stack td .note { display:inline; margin-left:6px; }
   .cbg { width:100%; } .cbg button { flex:1; justify-content:center; padding:0 8px; }
   .cbg button.on { padding:0 10px; }
 }
@@ -376,7 +383,7 @@ footer.foot p { margin:0; max-width:64ch; }
     <button class="navbtn" data-tab="courses"><span class="ind"></span><span class="ms" aria-hidden="true">checklist</span><span>Courses</span></button>
     <button class="navbtn" data-tab="creds"><span class="ind"></span><span class="ms" aria-hidden="true">workspace_premium</span><span class="lbl-full">Credentials</span><span class="lbl-short" aria-hidden="true">Certs</span></button>
     <button class="navbtn" data-tab="sophia"><span class="ind"></span><span class="ms" aria-hidden="true">school</span><span>Sophia</span></button>
-    <button class="navbtn" data-tab="compare"><span class="ind"></span><span class="ms" aria-hidden="true">compare_arrows</span><span>Tracks</span></button>
+    <button class="navbtn" data-tab="career"><span class="ind"></span><span class="ms" aria-hidden="true">trending_up</span><span>Career</span></button>
     <div class="rail-foot">Catalog 08-2026 · saved in this browser</div>
   </nav>
 
@@ -430,6 +437,12 @@ footer.foot p { margin:0; max-width:64ch; }
           <div class="panel s12">
             <div class="panel-head"><h2>Do these first</h2></div>
             <div class="todo-list" id="alerts"></div>
+          </div>
+
+          <div class="panel s12">
+            <div class="panel-head"><h2>Compare tracks</h2><span class="muted small">Select a row to switch</span></div>
+            <div class="tablewrap"><table id="compareTable" class="stack"></table></div>
+            <div class="prose" id="compareNotes" style="margin-top:18px"></div>
           </div>
         </div>
       </section>
@@ -485,7 +498,7 @@ footer.foot p { margin:0; max-width:64ch; }
             <p>From credly.com/users/dpugliese, plus Sophia and ITIL. WGU takes IT certs that are current and earned within 5 years of your start date.</p>
           </div>
         </header>
-        <div class="panel"><div class="tablewrap"><table id="credTable"></table></div></div>
+        <div class="panel"><div class="tablewrap"><table id="credTable" class="stack"></table></div></div>
       </section>
 
       <!-- ======================= SOPHIA ======================= -->
@@ -499,17 +512,19 @@ footer.foot p { margin:0; max-width:64ch; }
         <div class="panel" id="sophiaList"></div>
       </section>
 
-      <!-- ======================= COMPARE ======================= -->
-      <section id="tab-compare" class="view" hidden>
+      <!-- ======================= CAREER ======================= -->
+      <section id="tab-career" class="view" hidden>
         <header class="pagehead">
           <div>
-            <h1>Tracks</h1>
-            <p>All four tracks against what you already have. Select a row to make it your track.</p>
+            <h1>After the degree</h1>
+            <p id="careerSub"></p>
           </div>
         </header>
         <div class="grid">
-          <div class="panel s12"><div class="tablewrap"><table id="compareTable"></table></div></div>
-          <div class="panel s12 prose" id="compareNotes"></div>
+          <div class="panel s12" id="careerRoute"></div>
+          <div class="panel s12" id="careerCerts"></div>
+          <div class="panel s12" id="careerMasters"></div>
+          <div class="panel s12 prose" id="careerNotes"></div>
         </div>
       </section>
 
@@ -531,7 +546,8 @@ footer.foot p { margin:0; max-width:64ch; }
    Source: WGU Program Guidebooks BSCNE / BSCNEAWS / BSCNEAZR / BSCNECIS
    (catalog version 202608). Per-track [CUs, standard-path term].
    ============================================================== */
-const TUITION = 3925; // per 6-month term (wgu.edu program page)
+const TUITION = 3925; // per 6-month term (wgu.edu 2026-27 tuition table)
+const FEE = 200;      // e-books/resources fee per term (wgu.edu)
 
 const TRACKS = {
   general: { name: "General", code: "BSCNE",    total: 109, blurb: "Vendor-neutral. CompTIA-heavy (Cloud+, plus the stackables you already have)." },
@@ -622,7 +638,7 @@ const CONF_PILL = { confirmed:["p-good","confirmed"], likely:["p-acc","likely"],
 const KEY = "cne-speedrun-v1";
 const DEFAULTS = { track:"general", start:"2027-01-01", pace:10, target:3, useSophia:1, status:{}, sophiaPlan:{}, steps:{}, tab:"plan" };
 let S = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}"));
-S.steps = S.steps || {}; S.target = S.target || 3;
+S.steps = S.steps || {}; S.target = S.target || 3; if (S.tab === "compare") S.tab = "plan";
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
 
 /* ==============================================================
@@ -689,7 +705,7 @@ function calcFor(track) {
   const months = +S.target || 3;
   const terms = Math.max(1, Math.ceil(months / 6));
   const finish = new Date(S.start + "T00:00"); finish.setMonth(finish.getMonth() + months);
-  return { t, remaining, wguCUs, months, terms, finish, cost: terms * TUITION, perMonth: Math.ceil(wguCUs / months), perWeek: Math.ceil(wguCUs / (months * 4.345)) };
+  return { t, remaining, wguCUs, months, terms, finish, cost: terms * (TUITION + FEE), perMonth: Math.ceil(wguCUs / months), perWeek: Math.ceil(wguCUs / (months * 4.345)) };
 }
 
 function renderPlan() {
@@ -726,7 +742,7 @@ function renderPlan() {
     <dt>Credits to do at WGU</dt><dd>${c.wguCUs}</dd>
     <dt>Pace needed</dt><dd>${c.perWeek} CU a week</dd>
     <dt>Terms</dt><dd>${c.terms}</dd>
-    <dt>Tuition at $${TUITION.toLocaleString()} a term</dt><dd>$${c.cost.toLocaleString()}</dd>`;
+    <dt>Cost at $${(TUITION+FEE).toLocaleString()} a term</dt><dd>$${c.cost.toLocaleString()}</dd>`;
 
   document.querySelectorAll(".targetSeg button").forEach(b => { const on = +b.dataset.target === +S.target; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
   $("#startDate").value = S.start; $("#useSophia").checked = !!+S.useSophia;
@@ -857,7 +873,7 @@ function renderCompare() {
       <td class="r">${r.c.remaining}</td><td class="r">$${r.c.cost.toLocaleString()}</td>
       <td class="small">${r.v.blurb}</td></tr>`).join("");
   $("#compareNotes").innerHTML = `
-    <h2 style="margin-bottom:12px">Which one</h2>
+    <h2 style="margin-bottom:12px;font-size:18px">Which one</h2>
     <p><b>General or Azure.</b> Both give you the most transfer credit. General uses your Cloud+. Azure uses your AZ-900 instead and adds Azure admin and architect courses that fit your Entra ID and Intune work. Want the Azure credentials? Pick Azure and start before June 2027. Want the shortest path? Pick General.</p>
     <p><b>AWS</b> only matches if you renew Cloud Practitioner. <b>Cisco</b> drops your Network+ and Security+ credit and adds three 6 CU courses, so it's the slowest for you.</p>`;
 }
@@ -912,7 +928,7 @@ function renderSpeed() {
   const perWeek = wguCU / weeks;
 
   $("#speedHead").textContent = `Done by ${fmt(finish)}`;
-  $("#speedSub").innerHTML = `${TRACKS[S.track].name} track. Clear ${pre.length} course${pre.length===1?"":"s"} (${preCU} CU) before your ${fmtDay(start)} start, then ${wgu.length} at WGU (${wguCU} CU) in ${weeks} weeks: about <b>${perWeek.toFixed(1)} CU a week</b>, one term, $${TUITION.toLocaleString()}.`;
+  $("#speedSub").innerHTML = `${TRACKS[S.track].name} track. Clear ${pre.length} course${pre.length===1?"":"s"} (${preCU} CU) before your ${fmtDay(start)} start, then ${wgu.length} at WGU (${wguCU} CU) in ${weeks} weeks: about <b>${perWeek.toFixed(1)} CU a week</b>, one term, $${(TUITION+FEE).toLocaleString()} with the resources fee.`;
   const generalLeft = coursesFor("general").filter(c => !isDone(c)).reduce((a,c)=>a+c.cu,0);
   const thisLeft = list.filter(c => !isDone(c)).reduce((a,c)=>a+c.cu,0);
   const trackNote = S.track !== "general" && thisLeft > generalLeft
@@ -939,7 +955,7 @@ function renderSpeed() {
     preHtml += stepRow("ethics-opt", "Optional: Study.com Philosophy 104", `Clears <b>Ethics in Technology</b> (3 CU) before you start. Sophia has no course for it. Skip this if you'd rather take it at WGU.`, "",
       `<button class="btn tonal" data-plan-alt="ethics" style="height:36px;padding:0 14px">Add to route</button>`);
   preHtml += stepRow("transcript", "Send the final Sophia transcript", `After your last Sophia course, have Sophia send WGU an official transcript and confirm the evaluation updated. Leave about two weeks before your start date for this.`, daysToStart > 14 ? `By ${fmtDay(new Date(start - 14*DAY))}` : "");
-  preHtml += stepRow("start", `Start your first term on ${fmtDay(start)}`, `WGU terms start on the 1st of a month and cost the same however much you finish. Change the date on My plan if you need more time for Sophia.`, "");
+  preHtml += stepRow("start", `Start your first term on ${fmtDay(start)}`, `WGU terms start on the 1st of a month and cost the same however much you finish ($${TUITION.toLocaleString()} tuition plus a $${FEE} resources fee). Change the date on My plan if you need more time for Sophia.`, "");
   $("#speedPre").innerHTML = `<div class="panel-head"><h2>Before day one</h2><span class="muted small num">${daysToStart > 0 ? `${daysToStart} days until ${fmtDay(start)}${pre.length ? `, about ${perCourseDays} days per course with a 2-week buffer` : ""}` : "Your start date has passed; update it on My plan"}</span></div>
     ${trackNote}<ol class="steps rows">${preHtml}</ol>`;
 
@@ -979,9 +995,93 @@ function renderSpeed() {
     <p><b>Leave the capstone last but plan it early.</b> Pick a real work project now (Entra Conditional Access or your MCP infrastructure) and keep notes as you go.</p>`;
 }
 
+/* ==============================================================
+   CAREER: researched 2026-11-07 from vendor and program pages.
+   prio: core | strong | optional | watch | skip
+   ============================================================== */
+const MSCSIA_TERM = 4925 + FEE;
+const CERTS = [
+  { g:"Security leadership", name:"ISC2 CISSP", cost:749, prio:"core", fit:"5 years in 2 of 8 domains; your 10 years should qualify without a waiver. $135 a year after. New outline from Apr 15, 2027.", src:"https://www.isc2.org/certifications/cissp/cissp-experience-requirements" },
+  { g:"Security leadership", name:"ISACA AAISM (AI security management)", cost:0, costNote:"voucher in WGU MSCSIA, else $599", prio:"core", fit:"Requires an active CISSP or CISM. The top AI-security credential for a leader right now.", src:"https://www.isaca.org/credentialing/aaism" },
+  { g:"Security leadership", name:"ISACA CISM", cost:0, costNote:"optional voucher in WGU MSCSIA", prio:"strong", fit:"Security management; also unlocks AAISM on its own.", src:"https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-masters-program.html" },
+  { g:"Security leadership", name:"ISC2 CCSP", cost:599, prio:"optional", fit:"Senior cloud security. An active CISSP covers the whole experience requirement.", src:"https://www.isc2.org/certifications/ccsp/ccsp-experience-requirements" },
+  { g:"Security leadership", name:"ISC2 AI security certification", cost:null, costNote:"not launched", prio:"watch", fit:"Pilot Dec 2026 to Jan 2027, launch in 2027. A CISSP covers its experience requirement.", src:"https://www.isc2.org/new-ai-certification" },
+  { g:"Security leadership", name:"IAPP AIGP (AI governance)", cost:799, prio:"optional", fit:"AI governance; pairs with your NIST 800-53 work. $649 for members.", src:"https://store.iapp.org/aigp-exam/" },
+  { g:"Security leadership", name:"CompTIA SecAI+", cost:null, costNote:"price not published", prio:"skip", fit:"New (Feb 2026), entry-to-mid level. CISSP plus AAISM outranks it.", src:"https://www.comptia.org/en-us/certifications/secai/" },
+
+  { g:"Microsoft", name:"SC-300 Identity and Access Administrator", cost:165, prio:"strong", fit:"Your daily Entra ID work. Unlocks SC-100.", src:"https://learn.microsoft.com/en-us/credentials/certifications/cybersecurity-architect-expert/" },
+  { g:"Microsoft", name:"SC-100 Cybersecurity Architect Expert", cost:165, prio:"strong", fit:"Microsoft's top security cert. Free yearly renewal.", src:"https://learn.microsoft.com/en-us/credentials/certifications/cybersecurity-architect-expert/" },
+  { g:"Microsoft", name:"AI-103 Azure AI Apps and Agents Developer", cost:165, prio:"optional", fit:"Replaced the retired AI-102. Foundry and agents in Python.", src:"https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/" },
+  { g:"Microsoft", name:"AZ-104 → AZ-305 Azure Solutions Architect", cost:330, prio:"optional", fit:"Only if you also want the Azure architect title.", src:"https://learn.microsoft.com/en-us/credentials/certifications/azure-solutions-architect/" },
+
+  { g:"Google Cloud", name:"Associate Cloud Engineer", cost:125, prio:"strong", fit:"The entry to Google's professional certs; no prerequisites. 3-year validity.", src:"https://cloud.google.com/learn/certification/cloud-engineer" },
+  { g:"Google Cloud", name:"Professional Cloud Security Engineer", cost:200, prio:"strong", fit:"Maps to your security work on a third cloud.", src:"https://cloud.google.com/learn/certification/cloud-security-engineer" },
+  { g:"Google Cloud", name:"Professional Agentic Architect", cost:200, prio:"strong", fit:"New (GA mid-Nov 2026) and the closest match to your agent infrastructure. Only valid 1 year.", src:"https://cloud.google.com/learn/certification/agentic-architect" },
+  { g:"Google Cloud", name:"Professional Cloud Architect", cost:200, prio:"optional", fit:"Google's most recognised cert; take it if you go deep on GCP.", src:"https://cloud.google.com/learn/certification/cloud-architect" },
+  { g:"Google Cloud", name:"Professional Cloud Network Engineer", cost:200, prio:"optional", fit:"Matches the degree; lower priority than security.", src:"https://cloud.google.com/learn/certification/cloud-network-engineer" },
+  { g:"Google Cloud", name:"Professional Machine Learning Engineer", cost:200, prio:"optional", fit:"Model building and MLOps; less relevant to infrastructure leadership.", src:"https://cloud.google.com/learn/certification/machine-learning-engineer" },
+  { g:"Google Cloud", name:"Generative AI Leader · Cloud Digital Leader", cost:99, prio:"skip", fit:"Business-level; adds little at your level.", src:"https://cloud.google.com/learn/certification/generative-ai-leader" },
+
+  { g:"AWS", name:"Generative AI Developer – Professional", cost:300, prio:"optional", fit:"Hands-on GenAI architecture; wants 2 years building apps plus 1 year of GenAI.", src:"https://aws.amazon.com/certification/certified-generative-ai-developer-professional/" },
+  { g:"AWS", name:"Solutions Architect – Associate", cost:150, prio:"optional", fit:"Your Cloud Practitioner lapses Nov 19, 2026; this would replace it later.", src:"https://aws.amazon.com/certification/certified-solutions-architect-associate/" },
+  { g:"AWS", name:"Machine Learning Engineer – Associate", cost:150, prio:"skip", fit:"Included in WGU's M.S. Computer Science AI/ML if you go that way.", src:"https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/" },
+
+  { g:"AI platforms", name:"NVIDIA AI Infrastructure (NCP-AII)", cost:400, prio:"optional", fit:"Only if your role runs GPU infrastructure. 2-year validity.", src:"https://www.nvidia.com/en-us/learn/certification/" },
+  { g:"AI platforms", name:"Anthropic Claude Certified Architect", cost:null, costNote:"partner-only", prio:"watch", fit:"Exams are open only to Claude Partner Network members; worth it if your organisation joins.", src:"https://claude.com/resources/articles/four-role-based-claude-certifications" },
+];
+const MASTERS = [
+  { name:"WGU M.S. Cybersecurity and Information Assurance", cost:"$5,125 a term · 11 courses", fit:"Admitted on your current certs. Includes CySA+ and PenTest+; optional CISM and AAISM vouchers. No CISSP voucher.", verdict:"Recommended", cls:"t-good", src:"https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-masters-program.html" },
+  { name:"WGU M.S. Software Engineering, AI Engineering", cost:"$4,825 a term · 10 courses", fit:"Applied AI. You need an OOP course first; WGU Academy's Python course ($25) qualifies.", verdict:"AI alternative", cls:"t-acc", src:"https://www.wgu.edu/online-it-degrees/software-engineering-masters-program/ai-engineering.html" },
+  { name:"WGU M.S. Computer Science, AI and Machine Learning", cost:"$4,825 a term · 10 courses", fit:"Theory-heavy. From BSCNE you must first pass Foundations of Computer Science at WGU Academy. Includes AWS ML Engineer.", verdict:"Harder entry", cls:"t-warn", src:"https://wgu.edu/online-it-degrees/computer-science-masters-program/artificial-intelligence-machine-learning.html" },
+  { name:"Georgia Tech OMSCS, Machine Learning", cost:"about $6,810 total plus fees", fit:"Top-ranked for the price. Part-time and semester-paced; expects algorithms, linear algebra and probability.", verdict:"Later, for depth", cls:"t-info", src:"https://omscs.gatech.edu/specialization-machine-learning" },
+  { name:"UT Austin online M.S. in AI", cost:"$10,000+ total", fit:"Strong brand; may want math prerequisites. Fixed application deadlines.", verdict:"Later, for depth", cls:"t-info", src:"https://cdso.utexas.edu/msai" },
+  { name:"CU Boulder M.S. in AI (Coursera)", cost:"$15,750 total", fit:"No application: pass 3 pathway courses with a B. Math still expected.", verdict:"Low-risk entry", cls:"t-neutral", src:"https://www.coursera.org/degrees/ms-artificial-intelligence-boulder" },
+  { name:"WGU M.S. IT Management · MBA IT Management", cost:"$4,625–$5,050 a term", fit:"Easy and fast, but little AI or technical weight.", verdict:"Skip", cls:"t-neutral", src:"https://www.wgu.edu/online-it-degrees/information-technology-masters-program.html" },
+  { name:"Johns Hopkins M.S. in AI", cost:"about $56,000", fit:"Credible but expensive for what it adds.", verdict:"Skip", cls:"t-neutral", src:"https://ep.jhu.edu/programs/artificial-intelligence/" },
+];
+const PRIO = { core:["t-good","Core"], strong:["t-acc","Strong"], optional:["t-info","Optional"], watch:["t-warn","Watch"], skip:["t-neutral","Skip"] };
+const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return x; };
+
+function renderCareer() {
+  const c = calcFor(S.track), fin = c.finish;
+  const route = [
+    { when:"Now", title:"Let AWS Cloud Practitioner lapse on Nov 19", why:"The General track doesn't use it. Solutions Architect – Associate replaces it later if you want AWS on the résumé.", cost:0 },
+    { when:`Jan 1 → ${fmt(fin)}`, title:"Speedrun the B.S. Cloud & Network Engineering", why:"Earns the A+ exams on the way. Read for CISSP lightly in the evenings; it overlaps with Security+ and your NIST work.", cost:c.cost },
+    { when:`${fmt(addMonths(fin,1))} – ${fmt(addMonths(fin,2))}`, title:"Pass the CISSP", why:"The highest-value step. You qualify on experience. Study the outline that takes effect Apr 15, 2027. Endorsement by another CISSP comes after the exam.", cost:749 },
+    { when:`${fmt(addMonths(fin,3))} – ${fmt(addMonths(fin,9))}`, title:"WGU M.S. Cybersecurity and Information Assurance", why:"One or two terms at speedrun pace. Use its vouchers for CySA+, PenTest+, CISM and AAISM. With the CISSP already active, AAISM is open to you straight away.", cost:MSCSIA_TERM * 2, costNote:"2 terms; 1 if you go fast" },
+    { when:"Alongside the master's", title:"Microsoft SC-300, then SC-100", why:"Turns your Entra ID and Defender work into Microsoft's top security credential.", cost:330 },
+    { when:"Alongside the master's", title:"Google Cloud: Associate Cloud Engineer → Cloud Security Engineer → Agentic Architect", why:"Adds a third cloud and the newest agent-architecture cert, which matches the MCP infrastructure you already run. Renew Agentic Architect yearly.", cost:525 },
+    { when:"2028", title:"Pick your AI depth", why:"For governance: IAPP AIGP. For hands-on credibility: Georgia Tech OMSCS (Machine Learning) part-time, after brushing up on algorithms and linear algebra. Take ISC2's AI security cert when it launches.", cost:null, costNote:"optional" },
+  ];
+  const total = route.reduce((a,r) => a + (r.cost || 0), 0);
+  $("#careerSub").innerHTML = `A route to AI infrastructure and security leadership. Degree by <b>${fmt(fin)}</b>, CISSP by <b>${fmt(addMonths(fin,2))}</b>, master's and AI security credential by <b>${fmt(addMonths(fin,9))}</b>. Core route about <b>$${total.toLocaleString()}</b>, degree included.`;
+  $("#careerRoute").innerHTML = `<div class="panel-head"><h2>The route</h2></div><ol class="steps rows">` + route.map((r,i) => `
+    <li class="step"><div class="k">${i+1}</div><div><div class="when">${r.when}</div><div class="what">${r.title}</div><div class="why">${r.why}</div></div>
+    <div class="num" style="text-align:right;font-weight:560;white-space:nowrap">${r.cost ? "$" + r.cost.toLocaleString() : r.cost === 0 ? "$0" : "–"}${r.costNote ? `<div class="small muted" style="font-weight:400">${r.costNote}</div>` : ""}</div></li>`).join("") + `</ol>`;
+
+  const groups = [...new Set(CERTS.map(x => x.g))];
+  $("#careerCerts").innerHTML = `<div class="panel-head"><h2>Certification map</h2><span class="muted small">Exam prices in USD, checked Nov 7, 2026</span></div>
+    <div class="tablewrap"><table class="stack"><tr><th>Certification</th><th>Priority</th><th class="r">Cost</th><th>For you</th></tr>` +
+    groups.map(g => `<tr><td colspan="4" style="font-weight:620;padding-top:20px">${g}</td></tr>` + CERTS.filter(x => x.g === g).map(x => `
+      <tr><td><a href="${x.src}" target="_blank" rel="noopener">${x.name}</a></td><td><span class="tag ${PRIO[x.prio][0]}">${PRIO[x.prio][1]}</span></td>
+      <td class="r">${x.cost ? "$" + x.cost : "–"}${x.costNote ? `<div class="note">${x.costNote}</div>` : ""}</td><td class="small">${x.fit}</td></tr>`).join("")).join("") +
+    `</table></div>`;
+
+  $("#careerMasters").innerHTML = `<div class="panel-head"><h2>Master's options</h2><span class="muted small">WGU prices include the $${FEE} term fee</span></div>
+    <div class="tablewrap"><table class="stack"><tr><th>Program</th><th>Verdict</th><th>Cost</th><th>For you</th></tr>` +
+    MASTERS.map(m => `<tr><td><a href="${m.src}" target="_blank" rel="noopener">${m.name}</a></td><td><span class="tag ${m.cls}">${m.verdict}</span></td><td class="small" style="white-space:nowrap">${m.cost}</td><td class="small">${m.fit}</td></tr>`).join("") +
+    `</table></div>`;
+
+  $("#careerNotes").innerHTML = `<h2 style="margin-bottom:12px">Why this order</h2>
+    <p><b>CISSP before the master's.</b> It's the credential security-leadership job posts ask for, and with it active, the AAISM voucher in the master's is usable on day one.</p>
+    <p><b>WGU for the master's, not an AI-only degree.</b> WGU doesn't offer an M.S. in AI. The cybersecurity master's is the fastest credible option you can start right away, and it bundles four certs. There's no accelerated path from this bachelor's, so it starts after you graduate.</p>
+    <p><b>Agent and cloud certs in the gaps.</b> They're single exams you can schedule around terms. Google's Agentic Architect is new, so treat it as a signal of current skill and plan to renew it yearly.</p>
+    <p class="small muted">Checks still to make: WGU hasn't confirmed whether any BSCNE course carries into a master's, and Foundations of Computer Science's cost and length aren't published. Confirm ITIL v5 and the CISSP domain fit with WGU and ISC2.</p>`;
+}
+
 let lastTab = null;
 function renderAll() {
-  renderTrackSeg(); renderPlan(); renderSpeed(); renderCourses(); renderCreds(); renderSophia(); renderCompare();
+  renderTrackSeg(); renderPlan(); renderSpeed(); renderCourses(); renderCreds(); renderSophia(); renderCompare(); renderCareer();
   document.querySelectorAll("#tabs .navbtn").forEach(b => { const on = b.dataset.tab === S.tab; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   document.querySelectorAll("main section").forEach(s => {
     const show = s.id === "tab-" + S.tab;
