@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud & Network Engineering Speedrun</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+<style>
+  :root {
+    --bg:#f5f7fb; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --accent:#0e7490; --accent-soft:#ecfeff;
+    --good:#15803d; --good-soft:#f0fdf4; --warn:#b45309; --warn-soft:#fffbeb;
+    --bad:#b91c1c; --bad-soft:#fef2f2; --info:#4338ca; --info-soft:#eef2ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0b1120; --card:#111a2e; --ink:#e2e8f0; --muted:#94a3b8; --line:#1e293b;
+      --accent:#22d3ee; --accent-soft:#0c2a33;
+      --good:#4ade80; --good-soft:#0f2a1a; --warn:#fbbf24; --warn-soft:#2a2110;
+      --bad:#f87171; --bad-soft:#2b1212; --info:#a5b4fc; --info-soft:#1a1f3d;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  a { color:var(--accent); }
+  main { max-width:820px; margin:0 auto; padding:16px 16px 70px; }
+  h2 { font-size:1.05rem; margin:0 0 10px; }
+  h3 { font-size:.95rem; margin:14px 0 6px; }
+  .muted { color:var(--muted); } .small { font-size:.84rem; }
+  [hidden] { display:none !important; }
+
+  header { background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10; }
+  header .inner { max-width:820px; margin:0 auto; padding:12px 16px 0; }
+  .title { font-weight:700; font-size:1.1rem; }
+  .title span { color:var(--muted); font-weight:500; font-size:.85rem; margin-left:6px; }
+  nav { display:flex; gap:2px; overflow-x:auto; margin-top:8px; }
+  nav button { background:none; border:0; border-bottom:2px solid transparent; color:var(--muted);
+    padding:8px 12px; font:inherit; font-weight:600; cursor:pointer; white-space:nowrap; }
+  nav button.on { color:var(--accent); border-bottom-color:var(--accent); }
+
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:14px 0; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .stat { background:var(--bg); border-radius:10px; padding:10px 12px; }
+  .stat b { display:block; font-size:1.5rem; line-height:1.2; }
+  .bar { height:14px; background:var(--line); border-radius:99px; overflow:hidden; display:flex; margin:10px 0 4px; }
+  .bar i { display:block; height:100%; }
+  .legend { display:flex; flex-wrap:wrap; gap:12px; font-size:.8rem; color:var(--muted); }
+  .legend span::before { content:""; display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; background:var(--c); vertical-align:-1px; }
+
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  label.f { display:flex; flex-direction:column; gap:3px; font-size:.82rem; color:var(--muted); }
+  input[type=number], input[type=date], select { font:inherit; padding:6px 8px; border:1px solid var(--line);
+    border-radius:8px; background:var(--card); color:var(--ink); }
+  input[type=number] { width:90px; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+  .seg button { border:0; background:var(--card); color:var(--ink); padding:7px 12px; font:inherit; cursor:pointer; }
+  .seg button.on { background:var(--accent); color:var(--card); font-weight:600; }
+  .btn { border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:6px 12px; font:inherit; cursor:pointer; }
+  .btn:hover { border-color:var(--accent); }
+
+  .term { margin-top:16px; }
+  .term h3 { display:flex; justify-content:space-between; color:var(--muted); font-weight:600; text-transform:uppercase; font-size:.75rem; letter-spacing:.04em; }
+  .course { display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:start; padding:10px 0; border-top:1px solid var(--line); }
+  .course:first-of-type { border-top:0; }
+  .course .name { font-weight:600; }
+  .course .meta { font-size:.82rem; color:var(--muted); }
+  .course details { font-size:.85rem; margin-top:4px; }
+  .course details summary { cursor:pointer; color:var(--accent); }
+  .course details ul { margin:6px 0; padding-left:18px; }
+  .cu { font-weight:700; font-size:.85rem; color:var(--muted); white-space:nowrap; }
+  .st { appearance:none; border:1px solid var(--line); border-radius:8px; padding:4px 6px; font:inherit; font-size:.8rem;
+    background:var(--card); color:var(--ink); cursor:pointer; min-width:112px; }
+  .course.s-transfer .name::before, .course.s-done .name::before { content:"✓ "; color:var(--good); }
+  .course.s-transfer, .course.s-done { opacity:.75; }
+
+  .pill { display:inline-block; font-size:.72rem; font-weight:600; padding:1px 8px; border-radius:99px; margin:2px 4px 2px 0; }
+  .p-good { background:var(--good-soft); color:var(--good); }
+  .p-warn { background:var(--warn-soft); color:var(--warn); }
+  .p-bad { background:var(--bad-soft); color:var(--bad); }
+  .p-info { background:var(--info-soft); color:var(--info); }
+  .p-acc { background:var(--accent-soft); color:var(--accent); }
+
+  .alert { border-left:4px solid var(--c); background:var(--bg); border-radius:8px; padding:10px 12px; margin:8px 0; }
+  .alert b { color:var(--c); }
+  table { width:100%; border-collapse:collapse; font-size:.86rem; }
+  th, td { text-align:left; padding:7px 6px; border-top:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:.78rem; border-top:0; }
+  tr.mine td { background:var(--accent-soft); }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  footer { max-width:820px; margin:0 auto; padding:0 16px 40px; color:var(--muted); font-size:.8rem; }
+  footer .row { margin-bottom:8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="title">☁️ CNE Speedrun <span>WGU B.S. Cloud &amp; Network Engineering</span></div>
+    <nav id="tabs">
+      <button data-tab="plan" class="on">My Plan</button>
+      <button data-tab="courses">Courses</button>
+      <button data-tab="creds">My Credentials</button>
+      <button data-tab="sophia">Sophia</button>
+      <button data-tab="compare">Compare Tracks</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ======================= PLAN ======================= -->
+  <section id="tab-plan">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Your degree progress</h2>
+        <div class="seg" id="trackSeg"></div>
+      </div>
+      <div class="bar" id="bar"></div>
+      <div class="legend">
+        <span style="--c:var(--good)">Transfer / done</span>
+        <span style="--c:var(--accent)">In progress</span>
+        <span style="--c:var(--info)">Planned Sophia</span>
+        <span style="--c:var(--line)">Remaining</span>
+      </div>
+      <div class="stats" style="margin-top:12px" id="stats"></div>
+    </div>
+
+    <div class="card" id="alerts"><h2>⚠️ Do these first</h2></div>
+
+    <div class="card">
+      <h2>🏃 Speedrun calculator</h2>
+      <div class="row" style="margin-bottom:10px">
+        <div class="seg" id="paceSeg">
+          <button data-pace="6">😌 Chill</button>
+          <button data-pace="10">🚶 Steady</button>
+          <button data-pace="18">🏃 Speedrun</button>
+        </div>
+      </div>
+      <div class="row">
+        <label class="f">Planned WGU start<input type="date" id="startDate"></label>
+        <label class="f">CUs per month at WGU<input type="number" id="pace" min="1" max="60"></label>
+        <label class="f">Count planned Sophia<select id="useSophia"><option value="1">Yes</option><option value="0">No</option></select></label>
+      </div>
+      <div class="stats" style="margin-top:12px" id="calc"></div>
+      <p class="small muted" style="margin-bottom:0">Tuition is a flat price per 6-month term, so finishing faster costs less. Transfer credit only gets applied if it's on your official evaluation <b>before</b> your first term starts.</p>
+    </div>
+  </section>
+
+  <!-- ======================= COURSES ======================= -->
+  <section id="tab-courses" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Standard path by term</h2>
+        <div class="row">
+          <select id="courseFilter">
+            <option value="all">All courses</option>
+            <option value="todo">Still to do</option>
+            <option value="done">Done / transfer</option>
+          </select>
+        </div>
+      </div>
+      <p class="small muted">Status is set automatically from your credentials. Change it if you need to. <span class="pill p-good">confirmed</span> means it's on WGU's official Sophia pathway for this degree or a past WGU evaluation, <span class="pill p-acc">likely</span> means the guidebook names the matching cert, and <span class="pill p-warn">verify</span> means ask your Enrollment Counselor.</p>
+      <div id="courseList"></div>
+    </div>
+  </section>
+
+  <!-- ======================= CREDENTIALS ======================= -->
+  <section id="tab-creds" hidden>
+    <div class="card">
+      <h2>🏅 From your Credly (credly.com/users/dpugliese)</h2>
+      <p class="small muted">WGU only takes IT certifications that are <b>current</b> and were earned in the <b>last 5 years</b>, whichever window is shorter, measured from your start date. Change your start date on My Plan and this table updates.</p>
+      <div style="overflow-x:auto"><table id="credTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ======================= SOPHIA ======================= -->
+  <section id="tab-sophia" hidden>
+    <div class="card">
+      <h2>📚 Sophia: what you've done and what to add</h2>
+      <p class="small muted">Sophia costs about $99 a month for unlimited courses. Every course below is on WGU's official <a href="https://partners.wgu.edu/transferring-page?stateId=80&instId=796" target="_blank" rel="noopener">Sophia transfer pathway</a> for BS Cloud and Network Engineering (catalog 08-2026).</p>
+      <div id="sophiaList"></div>
+    </div>
+  </section>
+
+  <!-- ======================= COMPARE ======================= -->
+  <section id="tab-compare" hidden>
+    <div class="card">
+      <h2>⚖️ Every track, side by side</h2>
+      <p class="small muted">Tap a row to make it your track.</p>
+      <div style="overflow-x:auto"><table id="compareTable"></table></div>
+      <div id="compareNotes"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="row">
+    <button class="btn" id="backupBtn">📋 Copy backup</button>
+    <button class="btn" id="restoreBtn">📥 Restore backup</button>
+    <button class="btn" id="resetBtn">↺ Reset</button>
+  </div>
+  Saved in this browser only. Course list is from the WGU program guidebooks (catalog 202608, published 4/30/2026). Transfer mappings are estimates, and only your official WGU Transfer Evaluation counts. Not affiliated with WGU.
+</footer>
+
+<script>
+/* ==============================================================
+   DATA
+   Source: WGU Program Guidebooks BSCNE / BSCNEAWS / BSCNEAZR / BSCNECIS
+   (catalog version 202608). Per-track [CUs, standard-path term].
+   ============================================================== */
+const TUITION = 3925; // per 6-month term (wgu.edu program page)
+
+const TRACKS = {
+  general: { name: "General", code: "BSCNE",    total: 109, blurb: "Vendor-neutral. CompTIA-heavy (Cloud+, plus the stackables you already have)." },
+  azure:   { name: "Azure",   code: "BSCNEAZR", total: 112, blurb: "Microsoft path: AZ-900, plus courses for Azure admin and architect work." },
+  aws:     { name: "AWS",     code: "BSCNEAWS", total: 112, blurb: "AWS path: Cloud Practitioner, plus architecture and operations courses." },
+  cisco:   { name: "Cisco",   code: "BSCNECIS", total: 112, blurb: "CCNA, CyberOps, DevNet. Drops the Network+/Security+ courses." },
+};
+
+// sat = credential ids that can satisfy the course; conf = how sure the mapping is
+const COURSES = [
+  { id:"introit",  t:"Introduction to IT",                       area:"IT Core", tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:["s-introit"], conf:"confirmed" },
+  { id:"bizit",    t:"Business of IT - Applications",            area:"IT Core", cert:"ITIL Foundation", tr:{general:[4,1],azure:[4,1],aws:[4,1],cisco:[4,1]}, sat:["itil"], conf:"verify" },
+  { id:"ethics",   t:"Ethics in Technology",                     area:"Gen Ed",  tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:[] },
+  { id:"techcomm", t:"Technical Communication",                  area:"Gen Ed",  tr:{general:[3,1],azure:[3,1],aws:[3,1],cisco:[3,1]}, sat:[], sophia:"BUSI1025" },
+  { id:"linux",    t:"Linux Foundations",                        area:"IT Core", cert:"LPI Linux Essentials", tr:{general:[3,2],azure:[3,2],aws:[3,2],cisco:[3,2]}, sat:["lpi-le"], conf:"likely" },
+  { id:"itf",      t:"IT Foundations",                           area:"IT Core", cert:"CompTIA A+ Core 1", tr:{general:[4,2],azure:[4,2],aws:[4,2],cisco:[4,2]}, sat:["aplus"], conf:"likely" },
+  { id:"comp",     t:"Composition: Successful Self-Expression",  area:"Gen Ed",  tr:{general:[3,2],azure:[3,2],aws:[3,2],cisco:[3,2]}, sat:[], sophia:"English Composition I (ENG1001), or ENG1002 / ENG1010 / ENG1020" },
+  { id:"physsci",  t:"Integrated Physical Sciences",             area:"Gen Ed",  tr:{general:[3,2],azure:[3,2],aws:[3,2],cisco:[3,2]}, sat:[], sophia:"Intro to Chemistry (CHEM1001), Environmental Science (SCIE1005), or SCIE1020 / 1045 / 1050 / 1055 / 1060" },
+  { id:"itapps",   t:"IT Applications",                          area:"IT Core", cert:"CompTIA A+ Core 2", tr:{general:[4,3],azure:[4,3],aws:[4,3],cisco:[4,3]}, sat:["aplus"], conf:"likely" },
+  { id:"hfw",      t:"Health, Fitness, and Wellness",            area:"Gen Ed",  tr:{general:[4,3],azure:[4,3],aws:[4,3],cisco:[4,3]}, sat:[], sophia:"HLTH1010 or HLTH1011" },
+  { id:"stats",    t:"Applied Probability and Statistics",       area:"Gen Ed",  tr:{general:[3,3],azure:[3,3],aws:[3,3],cisco:[3,3]}, sat:["s-stats"], conf:"confirmed" },
+  { id:"algebra",  t:"Applied Algebra",                          area:"Gen Ed",  tr:{general:[3,3],azure:[3,3],aws:[3,3],cisco:[3,3]}, sat:[], sophia:"College Algebra (MATH1001), MATH1040, or MATH1035" },
+  { id:"netsecf",  t:"Network and Security - Foundations",       area:"Networking", tr:{general:[3,4],azure:[3,4],aws:[3,4],cisco:[3,4]}, sat:["s-net","netplus","secplus"], conf:"confirmed" },
+  { id:"networks", t:"Networks",                                 area:"Networking", cert:"CompTIA Network+", tr:{general:[4,4],azure:[4,4],aws:[4,4]}, sat:["netplus"], conf:"likely" },
+  { id:"ccna",     t:"Implementing and Administering Networking Solutions", area:"Networking", cert:"Cisco CCNA (200-301)", tr:{cisco:[6,4]}, sat:[], conf:"likely" },
+  { id:"netan",    t:"Network Analytics and Troubleshooting",    area:"Networking", tr:{general:[3,4],azure:[3,4],aws:[3,4],cisco:[3,4]}, sat:[] },
+  { id:"telecomm", t:"Telecomm and Wireless Communications",     area:"Networking", tr:{general:[3,4],azure:[3,4],aws:[3,4],cisco:[3,4]}, sat:[] },
+  { id:"vc",       t:"Version Control",                          area:"Automation", tr:{general:[1,5],azure:[1,5],aws:[1,5]}, sat:[] },
+  { id:"python",   t:"Foundations of Programming (Python)",      area:"Automation", tr:{general:[3,5],azure:[3,5],aws:[3,5],cisco:[3,5]}, sat:[] },
+  { id:"pyauto",   t:"Python for IT Automation",                 area:"Automation", tr:{general:[3,5],azure:[3,5],aws:[3,5],cisco:[3,5]}, sat:[], wguOnly:true },
+  { id:"sdn",      t:"Software Defined Networking",              area:"Networking", tr:{general:[3,5],azure:[3,5],aws:[3,5]}, sat:[] },
+  { id:"netauto",  t:"Network Automation and Deployment",        area:"Automation", tr:{general:[3,5]}, sat:[], wguOnly:true },
+  { id:"devnet",   t:"DevNet Fundamentals",                      area:"Automation", cert:"Cisco DevNet / CCNA Automation", tr:{cisco:[6,5]}, sat:[], conf:"verify" },
+  { id:"datamgmt", t:"Data Management - Foundations",            area:"IT Core", tr:{general:[3,6],azure:[3,6],aws:[3,6],cisco:[3,6]}, sat:["s-db"], conf:"confirmed" },
+  { id:"netseca",  t:"Network and Security - Applications",      area:"Security", cert:"CompTIA Security+", tr:{general:[4,6],azure:[4,6],aws:[4,6]}, sat:["secplus"], conf:"likely" },
+  { id:"cyberops", t:"Cyber Operations Fundamentals",            area:"Security", cert:"Cisco Certified CyberOps Associate", tr:{cisco:[6,6]}, sat:[], conf:"verify" },
+  { id:"cnsm",     t:"Cloud and Network Security Models",        area:"Security", tr:{general:[4,6],azure:[4,6],aws:[4,6],cisco:[4,6]}, sat:[] },
+  { id:"ai",       t:"AI for IT Automation and Security",        area:"Automation", tr:{general:[3,6],azure:[3,6],aws:[3,6],cisco:[3,6]}, sat:[] },
+  { id:"azfund",   t:"Azure Fundamentals",                       area:"Cloud", cert:"Microsoft AZ-900", tr:{azure:[3,7]}, sat:["az900"], conf:"likely" },
+  { id:"awsfound", t:"Cloud Foundations",                        area:"Cloud", cert:"AWS Certified Cloud Practitioner", tr:{aws:[3,7]}, sat:["awsccp"], conf:"likely" },
+  { id:"virt",     t:"Virtualization and IaaS",                  area:"Cloud", tr:{general:[3,7],azure:[3,7],aws:[3,7],cisco:[3,7]}, sat:[] },
+  { id:"cloudapps",t:"Cloud Applications",                       area:"Cloud", cert:"CompTIA Cloud+", tr:{general:[3,7],cisco:[3,7]}, sat:["cloudplus"], conf:"likely" },
+  { id:"iot",      t:"Internet of Things (IoT) and Infrastructure", area:"Cloud", tr:{general:[3,7],azure:[3,7],aws:[3,7],cisco:[3,7]}, sat:[] },
+  { id:"hybrid",   t:"Hybrid Cloud Infrastructure and Orchestration", area:"Cloud", tr:{general:[4,7],azure:[4,7],aws:[4,7],cisco:[4,7]}, sat:[], wguOnly:true },
+  { id:"azplat",   t:"Cloud Platform Solutions",                 area:"Cloud", cert:"Azure admin course (AZ-104-level)", tr:{azure:[3,8]}, sat:[], conf:"verify" },
+  { id:"azarch",   t:"Azure Solutions Architecture",             area:"Cloud", cert:"Azure architect course (AZ-305-level)", tr:{azure:[3,8]}, sat:[], conf:"verify" },
+  { id:"awsarch",  t:"AWS Cloud Architecture",                   area:"Cloud", cert:"AWS architecture course (SAA-level)", tr:{aws:[3,8]}, sat:[], conf:"verify" },
+  { id:"awsops",   t:"Cloud Deployment and Operations",          area:"Cloud", cert:"AWS operations course", tr:{aws:[3,8]}, sat:[], conf:"verify" },
+  { id:"ushist",   t:"US History: Stories of American Democracy", area:"Gen Ed", tr:{general:[3,8],azure:[3,5],aws:[3,5],cisco:[3,8]}, sat:[], sophia:"U.S. History I (HIST1001) or U.S. History II (HIST1002)" },
+  { id:"systems",  t:"Introduction to Systems Thinking and Applications", area:"Gen Ed", tr:{general:[3,8],azure:[3,8],aws:[3,8],cisco:[3,8]}, sat:[] },
+  { id:"visual",   t:"Influential Communication through Visual Design and Storytelling", area:"Gen Ed", tr:{general:[3,8],azure:[3,8],aws:[3,8],cisco:[3,8]}, sat:["s-visual"], sophia:"Visual Communications (COMM1005)", conf:"confirmed" },
+  { id:"itlead",   t:"IT Leadership Foundations",                area:"IT Core", tr:{general:[3,8],azure:[3,8],aws:[3,8],cisco:[3,8]}, sat:["s-mgmt"], conf:"confirmed" },
+  { id:"capstone", t:"Capstone Project",                         area:"Capstone", tr:{general:[4,9],azure:[4,8],aws:[4,8],cisco:[4,8]}, sat:[], wguOnly:true },
+];
+
+/* Credentials pulled from credly.com/users/dpugliese (Nov 2026) plus Sophia.
+   kind: cert | sophia. exp: null = no expiry. */
+const CREDS = [
+  { id:"netplus",   name:"CompTIA Network+ ce",           issued:"2026-01-28", exp:"2029-01-28", kind:"cert" },
+  { id:"secplus",   name:"CompTIA Security+ ce",          issued:"2025-11-19", exp:"2028-11-19", kind:"cert" },
+  { id:"cloudplus", name:"CompTIA Cloud+ ce",             issued:"2025-12-22", exp:"2028-12-22", kind:"cert" },
+  { id:"serverplus",name:"CompTIA Server+ ce",            issued:"2025-12-01", exp:"2028-12-01", kind:"cert" },
+  { id:"lpi-le",    name:"LPI Linux Essentials",          issued:"2026-02-04", exp:null,         kind:"cert" },
+  { id:"awsccp",    name:"AWS Certified Cloud Practitioner", issued:"2023-11-19", exp:"2026-11-19", kind:"cert" },
+  { id:"az900",     name:"Microsoft Azure Fundamentals (AZ-900)", issued:"2022-06-01", exp:null, kind:"cert" },
+  { id:"sc900",     name:"Microsoft SC-900",              issued:"2022-06-13", exp:null,         kind:"cert" },
+  { id:"ms900",     name:"Microsoft 365 Fundamentals",    issued:"2022-05-11", exp:null,         kind:"cert" },
+  { id:"isc2cc",    name:"ISC2 Certified in Cybersecurity", issued:"2024-01-05", exp:"2027-01-31", kind:"cert" },
+  { id:"vcp",       name:"VMware VCP-DCV 2022",           issued:"2022-10-09", exp:"2026-06-30", kind:"cert" },
+  { id:"aplus",     name:"CompTIA A+",                    issued:"2008-09-22", exp:null,         kind:"cert" },
+  { id:"itfplus",   name:"CompTIA ITF+",                  issued:"2021-02-01", exp:null,         kind:"cert" },
+  { id:"itil",      name:"ITIL (Version 5) Foundation", issued:"2026", exp:null, kind:"cert", note:"Not on Credly. Send the PeopleCert certificate to WGU." },
+  { id:"stack",     name:"CompTIA stackables: CIOS, CSIS, CSCP, CCAP, CNIP", issued:"2026-01-28", exp:"2028-11-19", kind:"cert" },
+  { id:"s-introit", name:"Sophia: Intro to Information Technology", issued:"2025-07-14", exp:null, kind:"sophia" },
+  { id:"s-net",     name:"Sophia: Intro to Networking",   issued:"2025-07-22", exp:null, kind:"sophia" },
+  { id:"s-db",      name:"Sophia: Intro to Relational Databases", issued:"2025-07-22", exp:null, kind:"sophia" },
+  { id:"s-stats",   name:"Sophia: Intro to Statistics",   issued:"2025-08-20", exp:null, kind:"sophia" },
+  { id:"s-visual",  name:"Sophia: Visual Communications", issued:"in progress", exp:null, kind:"sophia", inProgress:true },
+  { id:"s-mgmt",    name:"Sophia: Principles of Management (BUSI1013)", issued:"2025-08-03", exp:null, kind:"sophia" },
+  { id:"s-other",   name:"Sophia: Project Mgmt, Critical Thinking, Intro to Business, Finance, Microecon", issued:"2025-10-18", exp:null, kind:"sophia" },
+];
+
+const CONF_PILL = { confirmed:["p-good","confirmed"], likely:["p-acc","likely"], verify:["p-warn","verify"] };
+
+/* ==============================================================
+   STATE (localStorage)
+   ============================================================== */
+const KEY = "cne-speedrun-v1";
+const DEFAULTS = { track:"general", start:"2027-01-01", pace:10, useSophia:1, status:{}, sophiaPlan:{}, tab:"plan" };
+let S = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}"));
+const save = () => localStorage.setItem(KEY, JSON.stringify(S));
+
+/* ==============================================================
+   LOGIC
+   ============================================================== */
+const $ = s => document.querySelector(s);
+const fmt = d => d.toLocaleDateString(undefined, { month:"short", year:"numeric" });
+const addYears = (iso, n) => { const d = new Date(iso + "T00:00"); d.setFullYear(d.getFullYear() + n); return d; };
+
+// WGU rule: cert must be current AND earned within 5 years of start, whichever is shorter.
+function credOK(c, startIso) {
+  if (c.inProgress) return { ok:true, why:"" };
+  const start = new Date(startIso + "T00:00");
+  if (c.kind === "cert" && addYears(c.issued, 5) < start) return { ok:false, why:"Over 5 years old at start" };
+  if (c.exp && new Date(c.exp + "T00:00") < start) return { ok:false, why:"Expires before start" };
+  return { ok:true, why:"" };
+}
+const credById = id => CREDS.find(c => c.id === id);
+
+function coursesFor(track) {
+  return COURSES.filter(c => c.tr[track]).map(c => ({ ...c, cu:c.tr[track][0], term:c.tr[track][1] }))
+    .sort((a,b) => a.term - b.term);
+}
+function autoStatus(c) {
+  const ip = c.sat.map(credById).filter(Boolean).find(cr => cr.inProgress);
+  const hit0 = c.sat.map(credById).filter(Boolean).find(cr => !cr.inProgress && credOK(cr, S.start).ok);
+  if (!hit0 && ip) return { s:"sophia", by:ip };
+  const hit = hit0;
+  return hit ? { s:"transfer", by:hit } : { s:"todo" };
+}
+function statusOf(c) {
+  if (S.status[c.id]) return { s:S.status[c.id], manual:true, by:autoStatus(c).by };
+  if (c.sophia && S.sophiaPlan[c.id]) return { s:"sophia" };
+  return autoStatus(c);
+}
+function tally(track) {
+  const list = coursesFor(track); const t = { total:0, done:0, prog:0, sophia:0, n:list.length, left:0 };
+  list.forEach(c => {
+    const s = statusOf(c).s; t.total += c.cu;
+    if (s === "transfer" || s === "done") t.done += c.cu;
+    else if (s === "progress") t.prog += c.cu;
+    else if (s === "sophia") t.sophia += c.cu;
+    if (!(s === "transfer" || s === "done")) t.left++;
+  });
+  return t;
+}
+
+/* ==============================================================
+   RENDER
+   ============================================================== */
+function renderTrackSeg() {
+  $("#trackSeg").innerHTML = Object.entries(TRACKS).map(([k,v]) =>
+    `<button data-track="${k}" class="${S.track===k?"on":""}">${v.name}</button>`).join("");
+}
+
+function renderPlan() {
+  const t = tally(S.track), tot = t.total;
+  const pct = x => (x / tot * 100).toFixed(1) + "%";
+  $("#bar").innerHTML =
+    `<i style="width:${pct(t.done)};background:var(--good)"></i>` +
+    `<i style="width:${pct(t.prog)};background:var(--accent)"></i>` +
+    `<i style="width:${pct(t.sophia)};background:var(--info)"></i>`;
+  const remaining = tot - t.done;
+  $("#stats").innerHTML = `
+    <div class="stat"><b>${t.done} / ${tot}</b><span class="small muted">CUs knocked off</span></div>
+    <div class="stat"><b>${Math.round(t.done/tot*100)}%</b><span class="small muted">of ${TRACKS[S.track].name} track</span></div>
+    <div class="stat"><b>${remaining}</b><span class="small muted">CUs left</span></div>
+    <div class="stat"><b>${t.left}</b><span class="small muted">courses left</span></div>`;
+
+  // calculator
+  const wguCUs = Math.max(0, remaining - (S.useSophia ? t.sophia : 0));
+  const months = Math.max(1, Math.ceil(wguCUs / S.pace));
+  const terms = Math.max(1, Math.ceil(months / 6));
+  const finish = new Date(S.start + "T00:00"); finish.setMonth(finish.getMonth() + months);
+  $("#calc").innerHTML = `
+    <div class="stat"><b>${wguCUs}</b><span class="small muted">CUs to do at WGU</span></div>
+    <div class="stat"><b>${months} mo</b><span class="small muted">at ${S.pace} CU/month</span></div>
+    <div class="stat"><b>${fmt(finish)}</b><span class="small muted">estimated finish</span></div>
+    <div class="stat"><b>$${(terms*TUITION).toLocaleString()}</b><span class="small muted">${terms} term${terms>1?"s":""} × $${TUITION.toLocaleString()}</span></div>`;
+  document.querySelectorAll("#paceSeg button").forEach(b => b.classList.toggle("on", +b.dataset.pace === +S.pace));
+  $("#startDate").value = S.start; $("#pace").value = S.pace; $("#useSophia").value = S.useSophia;
+
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const start = new Date(S.start + "T00:00"), now = new Date();
+  const items = [];
+  const ccp = credById("awsccp");
+  const ccpExp = new Date(ccp.exp + "T00:00");
+  if (ccpExp > now) items.push(["var(--bad)", `AWS Cloud Practitioner expires ${ccpExp.toLocaleDateString()}.`,
+    `On the AWS track it would waive <i>Cloud Foundations</i>. WGU won't accept an expired cert, and your start date is after the expiry, so it only counts if you recertify. On the General or Azure track it doesn't matter.`]);
+  items.push(["var(--warn)", "AZ-900 ages out of the 5-year window on Jun 1, 2027.",
+    `If you pick the Azure track, your first term has to start by then for it to waive <i>Azure Fundamentals</i>.`]);
+  items.push(["var(--warn)", "Your A+ (2008) and ITF+ (2021) are too old to transfer.",
+    `<i>IT Foundations</i> and <i>IT Applications</i> (8 CUs) are the A+ Core 1 and Core 2 exams. The exam vouchers are included in tuition, and you already know this material, so plan to clear both in the first couple of weeks.`]);
+  items.push(["var(--info)", "Get a new transfer evaluation for Cloud & Network Engineering.",
+    `Your Nov 2025 evaluation was for IT Management, and transfer credit doesn't carry across programs. Ask your Enrollment Counselor to re-evaluate you for ${TRACKS[S.track].code}. Send official CompTIA, LPI, and Microsoft/AWS transcripts and the Sophia transcript before your start date.`]);
+  if (!S.sophiaPlan || !Object.values(S.sophiaPlan).some(Boolean)) items.push(["var(--info)", "Clear gen eds on Sophia first.",
+    `Six more courses (19 CUs) are on WGU's Sophia pathway for this degree, on top of the Visual Communications course you're taking now. See the Sophia tab.`]);
+  $("#alerts").innerHTML = `<h2>⚠️ Do these first</h2>` + items.map(([c,h,b]) =>
+    `<div class="alert" style="--c:${c}"><b>${h}</b><div class="small">${b}</div></div>`).join("");
+}
+
+function statusSelect(c, st) {
+  const opts = [["todo","To do"],["progress","In progress"],["done","Passed at WGU"],["transfer","Transfer"]];
+  if (c.sophia) opts.splice(1,0,["sophia","Planned Sophia"]);
+  return `<select class="st" data-course="${c.id}">` +
+    opts.map(([v,l]) => `<option value="${v}" ${st.s===v?"selected":""}>${l}</option>`).join("") +
+    (S.status[c.id] ? `<option value="__auto">↺ auto</option>` : "") + `</select>`;
+}
+
+function renderCourses() {
+  const f = $("#courseFilter").value;
+  const list = coursesFor(S.track);
+  const terms = [...new Set(list.map(c => c.term))];
+  $("#courseList").innerHTML = terms.map(term => {
+    const rows = list.filter(c => c.term === term).filter(c => {
+      const s = statusOf(c).s, isDone = s === "transfer" || s === "done";
+      return f === "all" || (f === "done" ? isDone : !isDone);
+    });
+    if (!rows.length) return "";
+    const cu = rows.reduce((a,c) => a + c.cu, 0);
+    return `<div class="term"><h3><span>Term ${term}</span><span>${cu} CU</span></h3>` + rows.map(c => {
+      const st = statusOf(c);
+      const pills = [];
+      if (c.cert) pills.push(`<span class="pill p-info">🎫 ${c.cert}</span>`);
+      if (st.s === "transfer" && st.by) pills.push(`<span class="pill p-good">via ${st.by.name}</span>`);
+      if (c.conf && (st.s === "transfer")) { const [cls,l] = CONF_PILL[c.conf]; pills.push(`<span class="pill ${cls}">${l}</span>`); }
+      if (c.sophia && st.s !== "transfer" && st.s !== "done") pills.push(`<span class="pill p-acc">Sophia: ${c.sophia}</span>`);
+      if (c.wguOnly) pills.push(`<span class="pill p-warn">WGU only, can't transfer</span>`);
+      const blocked = c.sat.map(credById).filter(Boolean).filter(cr => !credOK(cr, S.start).ok);
+      if (st.s === "todo" && blocked.length) pills.push(`<span class="pill p-bad">${blocked.map(b=>b.name).join(", ")}: ${credOK(blocked[0], S.start).why.toLowerCase()}</span>`);
+      return `<div class="course s-${st.s}">
+        <div class="cu">${c.cu} CU</div>
+        <div><div class="name">${c.t}</div><div class="meta">${c.area}</div><div>${pills.join("")}</div>${tipsFor(c)}</div>
+        <div>${statusSelect(c, st)}</div>
+      </div>`;
+    }).join("") + `</div>`;
+  }).join("");
+}
+
+function tipsFor(c) {
+  const T = {
+    itf: ["You're a 10-year IT veteran. Book the A+ Core 1 voucher right away and use the CompTIA exam objectives as your checklist."],
+    itapps: ["Same as Core 1: skim the objectives for anything newer than your experience (Windows 11 tooling, mobile MDM, scripting basics) and test fast."],
+    bizit: ["The guidebook ties this course to ITIL 4. You hold ITIL (Version 5) Foundation, so ask your counselor to confirm WGU accepts v5 for it."],
+    netan: ["Your Network+ and Server+ knowledge carries a lot of this course."],
+    telecomm: ["Wireless standards and telecom concepts. Network+ covers most of it."],
+    cnsm: ["Security+, Cloud+, and ISC2 CC cover most of the concepts here."],
+    virt: ["Your VCP-DCV background makes this one easier."],
+    hybrid: ["Your hands-on Entra ID and Azure hybrid work maps straight onto this."],
+    python: ["Your Node and React experience transfers well. It's mostly syntax."],
+    pyauto: ["Script things you already automate at work."],
+    ai: ["You run production MCP and agent infrastructure. Use that as your material."],
+    capstone: ["Pick a real project from work (Entra Conditional Access rollout, MCP infrastructure) so you write it up rather than build something new."],
+  }[c.id];
+  return T ? `<details><summary>Tips</summary><ul>${T.map(x=>`<li>${x}</li>`).join("")}</ul></details>` : "";
+}
+
+function renderCreds() {
+  const used = id => Object.keys(TRACKS).filter(tk => coursesFor(tk).some(c => c.sat.includes(id)));
+  $("#credTable").innerHTML = `<tr><th>Credential</th><th>Earned</th><th>Expires</th><th>Usable at start?</th><th>Waives (track)</th></tr>` +
+    CREDS.map(c => {
+      const ok = credOK(c, S.start);
+      const waives = COURSES.filter(co => co.sat.includes(c.id)).map(co =>
+        `${co.t} <span class="muted">(${Object.keys(co.tr).length===4?"all":Object.keys(co.tr).map(k=>TRACKS[k].name).join(", ")})</span>`);
+      return `<tr>
+        <td>${c.name}${c.note ? `<div class="small muted">${c.note}</div>` : ""}</td><td>${c.issued}</td><td>${c.exp || "—"}</td>
+        <td>${c.inProgress ? `<span class="pill p-info">in progress</span>` : ok.ok ? `<span class="pill p-good">yes</span>` : `<span class="pill p-bad">${ok.why}</span>`}</td>
+        <td class="small">${waives.join("<br>") || `<span class="muted">${c.id==="stack"?"Already earned. The General/Azure/AWS tracks bundle these, so less to do.":"No matching course in this program"}</span>`}</td></tr>`;
+    }).join("");
+}
+
+function renderSophia() {
+  const done = CREDS.filter(c => c.kind === "sophia" && !c.inProgress);
+  const ip = CREDS.filter(c => c.kind === "sophia" && c.inProgress);
+  const cand = coursesFor(S.track).filter(c => c.sophia && !c.sat.some(id => credById(id)?.inProgress));
+  $("#sophiaList").innerHTML =
+    `<h3>✓ Already completed</h3><ul class="small">` + done.map(c => {
+      const hits = COURSES.filter(co => co.sat.includes(c.id) && co.tr[S.track]).map(co => co.t);
+      return `<li>${c.name.replace("Sophia: ","")}: ${hits.length ? `<b>→ ${hits.join(", ")}</b>` : `<span class="muted">no matching course in this degree</span>`}</li>`;
+    }).join("") + `</ul>` +
+    (ip.length ? `<h3>⏳ In progress</h3><ul class="small">` + ip.map(c => {
+      const hits = COURSES.filter(co => co.sat.includes(c.id) && co.tr[S.track]).map(co => co.t);
+      return `<li>${c.name.replace("Sophia: ","")}: <b>→ ${hits.join(", ")}</b> <span class="pill p-good">on WGU pathway</span></li>`;
+    }).join("") + `</ul>` : "") +
+    `<h3>➕ Take next (check them off as you plan them)</h3>` + cand.map(c => {
+      const st = statusOf(c).s, isDone = st==="transfer"||st==="done";
+      return `<div class="course"><div class="cu">${c.cu} CU</div>
+        <div><div class="name">${c.sophia}</div><div class="meta">→ WGU ${c.t}</div><span class="pill p-good">on WGU pathway</span></div>
+        <div><label class="small"><input type="checkbox" data-sophia="${c.id}" ${S.sophiaPlan[c.id]||isDone?"checked":""} ${isDone?"disabled":""}> plan it</label></div></div>`;
+    }).join("") +
+    `<p class="small muted">Per WGU's Sophia pathway for this degree (catalog 08-2026), Sophia can transfer up to 37 credits. It has no course for <i>Ethics in Technology</i>, <i>Introduction to Systems Thinking</i>, or <i>Business of IT</i>. Ethics can come from Study.com Philosophy 104 instead.</p>`;
+}
+
+function renderCompare() {
+  const rows = Object.entries(TRACKS).map(([k,v]) => {
+    const saved = S.track; S.track = k; const t = tally(k); S.track = saved;
+    const left = t.total - t.done;
+    const months = Math.ceil(left / S.pace), terms = Math.max(1, Math.ceil(months/6));
+    return { k, v, t, left, months, terms };
+  });
+  $("#compareTable").innerHTML = `<tr><th>Track</th><th class="num">Total</th><th class="num">You have</th><th class="num">Left</th><th class="num">Est. cost</th><th>Notes</th></tr>` +
+    rows.map(r => `<tr data-pick="${r.k}" class="${S.track===r.k?"mine":""}" style="cursor:pointer">
+      <td><b>${r.v.name}</b></td><td class="num">${r.t.total}</td><td class="num">${r.t.done}</td>
+      <td class="num">${r.left}</td><td class="num">$${(r.terms*TUITION).toLocaleString()}</td>
+      <td class="small">${r.v.blurb}</td></tr>`).join("");
+  $("#compareNotes").innerHTML = `
+    <h3>The play</h3>
+    <p class="small"><b>General or Azure.</b> Both give you the most transfer credit. General uses your Cloud+. Azure uses your AZ-900 instead, and adds Azure admin and architect courses that fit your Entra ID and Intune work and your Director-of-IT resume. If you want the Azure credentials, pick Azure and start before June 2027. If you want the shortest path, pick General.</p>
+    <p class="small"><b>AWS</b> only matches if you renew Cloud Practitioner. <b>Cisco</b> throws away your Network+ and Security+ credit and adds three 6-CU courses, so it's the slowest for you.</p>`;
+}
+
+function renderAll() {
+  renderTrackSeg(); renderPlan(); renderCourses(); renderCreds(); renderSophia(); renderCompare();
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
+  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== "tab-" + S.tab);
+}
+
+/* ==============================================================
+   EVENTS
+   ============================================================== */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-tab],[data-track],[data-pace],[data-pick]");
+  if (!t) return;
+  if (t.dataset.tab) S.tab = t.dataset.tab;
+  if (t.dataset.track) S.track = t.dataset.track;
+  if (t.dataset.pick) S.track = t.dataset.pick;
+  if (t.dataset.pace) S.pace = +t.dataset.pace;
+  save(); renderAll();
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.matches(".st")) { if (t.value === "__auto") delete S.status[t.dataset.course]; else S.status[t.dataset.course] = t.value; }
+  else if (t.dataset.sophia) S.sophiaPlan[t.dataset.sophia] = t.checked;
+  else if (t.id === "startDate" && t.value) S.start = t.value;
+  else if (t.id === "pace") S.pace = Math.max(1, +t.value || 1);
+  else if (t.id === "useSophia") S.useSophia = +t.value;
+  else if (t.id !== "courseFilter") return;
+  save(); renderAll();
+});
+$("#backupBtn").onclick = async () => {
+  const txt = btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  try { await navigator.clipboard.writeText(txt); alert("Backup copied to clipboard."); }
+  catch { prompt("Copy this backup code:", txt); }
+};
+$("#restoreBtn").onclick = () => {
+  const txt = prompt("Paste your backup code:"); if (!txt) return;
+  try { S = Object.assign({}, DEFAULTS, JSON.parse(decodeURIComponent(escape(atob(txt.trim()))))); save(); renderAll(); }
+  catch { alert("That backup code didn't work."); }
+};
+$("#resetBtn").onclick = () => { if (confirm("Reset all progress and settings?")) { S = { ...DEFAULTS, status:{}, sophiaPlan:{} }; save(); renderAll(); } };
+
+renderAll();
+</script>
+</body>
+</html>
