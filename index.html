@@ -308,6 +308,86 @@ footer.foot p { margin:0; max-width:64ch; }
 @media (max-width: 599px) { .sum-strip { grid-template-columns:1fr 1fr; } .sum-strip > div:nth-child(3) { box-shadow:inset 0 1px 0 var(--surface-high); } .sum-strip > div:nth-child(4) { box-shadow:inset 1px 0 0 var(--surface-high), inset 0 1px 0 var(--surface-high); }
   .step { grid-template-columns:28px minmax(0,1fr); } .step > :last-child { grid-column:2; } }
 
+/* ==============================================================
+   ROADMAP: trunk, fork, lanes
+   ============================================================== */
+.meter { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; align-items:end; }
+.meter .big { margin:0; }
+.meter-bar { height:24px; display:flex; align-items:center; gap:6px; margin:14px 0 6px; }
+.meter-bar .seg { height:24px; flex:none; transition:flex-basis 800ms var(--spring-slow); }
+.meter-bar .rest { flex:1 1 auto; height:6px; border-radius:var(--r-full); background:var(--track); }
+.meter-scale { display:flex; justify-content:space-between; font-size:13px; color:var(--on-surface-variant); font-variant-numeric:tabular-nums; }
+.salary-in { display:flex; align-items:center; gap:8px; }
+.salary-in input { width:130px; }
+
+.road { position:relative; list-style:none; margin:0; padding:0; }
+.road > li { position:relative; display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:14px; padding:0 0 22px; }
+.road > li::before { content:""; position:absolute; left:20px; top:22px; bottom:-2px; width:4px; border-radius:2px; background:var(--rail, var(--outline-variant)); }
+.road > li:last-child::before { display:none; }
+.road > li.done { --rail:var(--primary); }
+.node { width:44px; height:44px; display:grid; place-items:center; position:relative; z-index:1; }
+.node i { display:block; width:18px; height:18px; border-radius:50%; background:var(--surface-low); box-shadow:inset 0 0 0 4px var(--outline);
+  transition:transform 450ms var(--spring), background-color 200ms var(--effects), box-shadow 200ms var(--effects), border-radius 450ms var(--spring); }
+.done .node i { background:var(--primary); box-shadow:none; }
+.job .node i { width:34px; height:34px; border-radius:var(--r-m); background:var(--tertiary-container); box-shadow:none; display:grid; place-items:center; }
+.job .node i::after { content:"$"; font-style:normal; font-weight:700; font-size:16px; color:var(--on-tertiary-container); }
+.job.done .node i { background:var(--primary); } .job.done .node i::after { color:var(--on-primary); }
+.goal .node i { width:40px; height:40px; border-radius:var(--r-l); background:var(--primary); transform:rotate(45deg); display:grid; place-items:center; }
+.goal .node i::after { content:"200k"; display:block; transform:rotate(-45deg); color:var(--on-primary); font-size:11px; font-weight:700; font-style:normal; }
+.fork-node .node i { width:28px; height:28px; border-radius:var(--r-s); transform:rotate(45deg); background:var(--warn-container); box-shadow:none; }
+.here .node i { transform:scale(1.25); box-shadow:0 0 0 6px color-mix(in srgb, var(--primary) 22%, transparent), inset 0 0 0 4px var(--primary); }
+.job.here .node i, .goal.here .node i { transform:scale(1.1); }
+.road .body { padding-top:9px; min-width:0; }
+.road .when { font-size:13px; font-weight:600; color:var(--primary); }
+.road .what { font-weight:600; font-size:16px; line-height:22px; }
+.road .why { font-size:14px; line-height:20px; color:var(--on-surface-variant); margin-top:3px; max-width:72ch; }
+.road .side { padding-top:10px; display:flex; flex-direction:column; align-items:flex-end; gap:4px; white-space:nowrap; font-size:14px; font-variant-numeric:tabular-nums; }
+.road .side .pay { display:block; font-size:18px; font-weight:560; color:var(--on-surface); }
+.road .side .checkbox { margin-top:4px; }
+.road .here-tag { display:inline-flex; margin-left:8px; vertical-align:2px; }
+.road .why b { color:var(--on-surface); font-weight:600; }
+.road li.dim { opacity:.55; }
+.choice { margin-top:8px; display:grid; gap:8px; }
+.choice > div { background:var(--surface-low); border-radius:var(--r-m); padding:10px 12px; font-size:14px; line-height:20px; }
+.choice > div b { display:block; color:var(--on-surface); }
+
+.forkhead { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:center; margin:6px 0 16px; }
+.lanes { display:grid; grid-template-columns:repeat(var(--n,4), minmax(0,1fr)); gap:12px; align-items:start; }
+.lane { border-radius:var(--r-xl); padding:18px 14px 6px; background:var(--surface-low); transition:background-color 300ms var(--effects), transform 450ms var(--spring); cursor:pointer; }
+.lane:hover { background:color-mix(in srgb, var(--on-surface) 5%, var(--surface-low)); }
+.lane.on { background:var(--surface-lowest); box-shadow:inset 0 0 0 2px var(--primary); cursor:default; }
+.lane-h { padding:0 4px 14px; }
+.lane-h .nm { font-size:18px; font-weight:640; line-height:24px; }
+.lane-h .role { font-size:14px; color:var(--on-surface-variant); margin-top:2px; line-height:20px; }
+.lane-h .band { font-size:22px; font-weight:500; margin-top:8px; font-variant-numeric:tabular-nums; }
+.lane-h .band small { font-size:13px; color:var(--on-surface-variant); font-weight:400; }
+.lane-h .tags { margin-top:8px; }
+.lane .road > li { grid-template-columns:36px minmax(0,1fr); gap:10px; padding-bottom:16px; }
+.lane .road > li::before { left:16px; }
+.lane .node { width:36px; height:36px; }
+.lane .road .side { grid-column:2; align-items:flex-start; padding-top:2px; }
+.lane .road .side .checkbox { justify-content:flex-start; }
+.lane .road .what { font-size:15px; line-height:20px; }
+.lane .road .why { font-size:13px; line-height:18px; }
+.lane:not(.on) .road .why, .lane:not(.on) .road .side .checkbox { display:none; }
+.lane:not(.on) { --rail:var(--outline-variant); }
+.lane-pick { width:100%; justify-content:center; margin:4px 0 12px; }
+.lane.on .lane-pick { display:none; }
+.laneSeg { display:none; }
+@media (max-width: 1180px) and (min-width: 600px) { .lanes { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (max-width: 599px) {
+  .laneSeg { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .lanes { grid-template-columns:1fr; }
+  .lane:not(.on) { display:none; }
+  .lane .road .why, .lane .road .side .checkbox { display:block; }
+  .road > li { grid-template-columns:36px minmax(0,1fr); }
+  .road > li::before { left:16px; }
+  .road .node { width:36px; height:36px; }
+  .road .side { grid-column:2; align-items:flex-start; padding-top:2px; }
+  .road .side .checkbox { justify-content:flex-start; }
+  .meter { grid-template-columns:1fr; }
+}
+
 /* tab content transition */
 .view { animation:viewIn 420ms var(--emph-decel) both; }
 @keyframes viewIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
@@ -516,7 +596,7 @@ footer.foot p { margin:0; max-width:64ch; }
       <section id="tab-career" class="view" hidden>
         <header class="pagehead">
           <div>
-            <h1>After the degree</h1>
+            <h1>Road to $200k</h1>
             <p id="careerSub"></p>
           </div>
         </header>
@@ -638,7 +718,7 @@ const CONF_PILL = { confirmed:["p-good","confirmed"], likely:["p-acc","likely"],
 const KEY = "cne-speedrun-v1";
 const DEFAULTS = { track:"general", start:"2027-01-01", pace:10, target:3, useSophia:1, status:{}, sophiaPlan:{}, steps:{}, tab:"plan" };
 let S = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}"));
-S.steps = S.steps || {}; S.target = S.target || 3; if (S.tab === "compare") S.tab = "plan";
+S.steps = S.steps || {}; S.target = S.target || 3; S.ms = S.ms || {}; S.choice = S.choice || {}; S.road = S.road || "sec"; if (S.tab === "compare") S.tab = "plan";
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
 
 /* ==============================================================
@@ -1042,23 +1122,144 @@ const MASTERS = [
 const PRIO = { core:["t-good","Core"], strong:["t-acc","Strong"], optional:["t-info","Optional"], watch:["t-warn","Watch"], skip:["t-neutral","Skip"] };
 const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return x; };
 
+const RH = "https://www.roberthalf.com/us/en/insights/salary-guide/technology";
+const SRC = {
+  rhSec:"https://www.roberthalf.com/us/en/job-details/security-architect/philadelphia-pa",
+  rhCiso:"https://www.roberthalf.com/us/en/job-details/chief-information-security-officer/philadelphia-pa",
+  rhAi:"https://www.roberthalf.com/us/en/job-details/ai-architect/philadelphia-pa",
+  rhCloud:"https://www.roberthalf.com/us/en/job-details/networkcloud-architect/philadelphia-pa",
+  ians:"https://www.ians.com/press/ians-research-and-artico-search-unveil-the-2025-cybersecurity-staff-compensation-benchmark-report",
+  iansCiso:"https://www.ians.com/blog/ians-research/the-ciso-pay-gap-inside-cybersecuritys-massive-compensation-divide",
+  levels:"https://www.levels.fyi/t/solution-architect/locations/united-states",
+  census:"https://econpapers.repec.org/RePEc:cen:wpaper:26-33",
+};
+/* Milestones. m = months after degree finish (negative = before). kind: step | cert | degree | job | fork | detour
+   pay = typical base for the role (source in src). */
+const TRUNK = [
+  { id:"t-plan",  m:null, when:"This week", kind:"step", title:"Lock in the degree", why:"Request the BSCNE transfer evaluation and start the Sophia queue. The Speedrun tab has the checklist." },
+  { id:"t-start", m:"start", kind:"step", title:"Start your first WGU term", why:"One term at speedrun pace." },
+  { id:"t-bs",    m:0, kind:"degree", title:"B.S. Cloud & Network Engineering", why:"The degree box ticked for HR filters; A+ earned on the way." },
+  { id:"t-cissp", m:2, kind:"cert", title:"CISSP", cost:749, why:"The single strongest screening credential for every road below. Pass the exam, then get endorsed." },
+  { id:"t-brand", m:2, kind:"step", title:"Reposition yourself", why:"Rewrite the résumé and LinkedIn as a <b>security and AI infrastructure leader</b>: 150K-member org, production MCP and agent platform, Entra ID and NIST 800-53 ownership. Every road below depends on this story." },
+];
+const ROADS = {
+  sec: { name:"Security leadership", role:"Director of Security, then CISO", band:[170510,209155,247505], bandSrc:SRC.rhSec, bandNote:"Philly security manager, RH 2027",
+    fit:["Strongest fit","t-good"], blurb:"Your Entra, Defender and NIST 800-53 work plus CISSP fits these postings closely. CISO pay starts above $200k.",
+    ms:[
+      { id:"s-ms",   m:3, kind:"degree", title:"WGU M.S. Cybersecurity & Information Assurance", cost:10250, why:"1–2 terms. Use the vouchers: CySA+, PenTest+, CISM, and AAISM (open now that the CISSP is active)." },
+      { id:"s-sc",   m:5, kind:"cert", title:"SC-300 → SC-100", cost:330, why:"Microsoft's top security architect cert; matches your Entra work." },
+      { id:"s-fork", m:7, kind:"detour", title:"Stay or move?", options:[
+        { t:"Stay and pitch the role", d:"Propose a Head of Security title at your nonprofit with the CISSP, CISM and AAISM case. Nonprofits pay about 12% less across occupations, so $200k is a stretch." },
+        { t:"Move to a for-profit", d:"Apply for Director of Information Security roles in Philadelphia or remote. This is where the $209k median sits." } ] },
+      { id:"s-dir",  m:9, kind:"job", title:"Director of Information Security", pay:209155, src:SRC.rhSec, srcNote:"RH 2027 Philly mid", why:"Negotiate from the mid, not the low: $171k–$248k is the Philly range." },
+      { id:"s-aaism",m:12, kind:"cert", title:"AAISM in hand, AI security owner", why:"Become the person who secures your company's AI and agent rollout. That is the CISO story." },
+      { id:"s-ciso", m:30, kind:"job", title:"CISO", pay:265205, src:SRC.rhCiso, srcNote:"RH 2027 Philly mid", why:"$228k–$335k base in Philly; the IANS median CISO total pay (with bonus and equity) is $392k." },
+    ] },
+  ai: { name:"AI platform leadership", role:"AI Architect, then Head of AI Platform", band:[171395,212105,240720], bandSrc:SRC.rhAi, bandNote:"Philly AI architect, RH 2027",
+    fit:["Highest ceiling","t-acc"], blurb:"Your production MCP and agent platform is the differentiator. Base clears $200k at the mid; tech-company total pay runs far higher.",
+    ms:[
+      { id:"a-gcp",  m:3, kind:"cert", title:"Google Associate Cloud Engineer → Professional Agentic Architect", cost:325, why:"The newest agent-architecture cert. Renew yearly." },
+      { id:"a-case", m:4, kind:"step", title:"Publish your agent platform", why:"A written case study or talk on the MCP infrastructure you run: architecture, identity for agents, security controls. Hiring managers will ask for it." },
+      { id:"a-gen",  m:6, kind:"cert", title:"AWS Generative AI Developer – Professional", cost:300, why:"Hands-on GenAI architecture on a second cloud. Or Microsoft AI-103 ($165) if you stay Azure-first." },
+      { id:"a-fork", m:7, kind:"detour", title:"How much AI depth?", options:[
+        { t:"Georgia Tech OMSCS, Machine Learning", d:"About $6,810, part-time over 2–3 years. Brush up on algorithms and linear algebra first. Opens big-tech ML leadership." },
+        { t:"WGU cybersecurity master's", d:"Faster, and makes you the AI-plus-security candidate, the best-paid niche with the least competition." } ] },
+      { id:"a-arch", m:9, kind:"job", title:"AI Architect", pay:212105, src:SRC.rhAi, srcNote:"RH 2027 Philly mid", why:"$171k–$241k base in Philly. Remote roles benchmarked to national pay tend to run higher." },
+      { id:"a-head", m:30, kind:"job", title:"Head of AI Platform", pay:null, payText:"$250k+", src:"https://www.levels.fyi/t/software-engineering-manager/locations/united-states", srcNote:"Levels.fyi eng. manager TC", why:"Leadership pay at tech companies is mostly total compensation; Levels.fyi's US engineering-manager median is $360k total." },
+    ] },
+  arch: { name:"Cloud & AI security architect", role:"Principal Cloud Security Architect", band:[166380,189390,211810], bandSrc:SRC.rhSec, bandNote:"Philly security architect, RH 2027",
+    fit:["Hands-on","t-info"], blurb:"Individual-contributor track. $200k comes at the high end in Philly or at tech, finance and vendors.",
+    ms:[
+      { id:"r-sc",   m:3, kind:"cert", title:"SC-300 → SC-100", cost:330, why:"The Microsoft security architect credential." },
+      { id:"r-gcp",  m:5, kind:"cert", title:"Google Associate Cloud Engineer → Professional Cloud Security Engineer", cost:325, why:"Multi-cloud security on your résumé." },
+      { id:"r-aaism",m:7, kind:"cert", title:"ISACA AAISM", cost:649, why:"AI security management, unlocked by your CISSP. Makes you an AI security architect, not just a cloud one." },
+      { id:"r-fork", m:8, kind:"detour", title:"Which employer?", options:[
+        { t:"Vendor or big tech, remote", d:"Paid on national bands; Levels.fyi US solution-architect median total pay is $220k." },
+        { t:"Philadelphia enterprise or finance", d:"Base around $189k–$212k; finance pays the most locally." } ] },
+      { id:"r-job",  m:10, kind:"job", title:"Principal Cloud Security Architect", pay:206000, src:SRC.ians, srcNote:"IANS 2025 avg cash", why:"Security architects average $206k cash in the IANS staff study; the Northeast pays at the top." },
+    ] },
+  it: { name:"IT leadership, for-profit", role:"Director of IT, then VP of IT", band:[160480,197355,236000], bandSrc:SRC.rhCiso, bandNote:"Philly IT director, RH 2027",
+    fit:["Lowest friction","t-neutral"], blurb:"Same job, better-paying sector. Lands right at the threshold, so negotiation matters.",
+    ms:[
+      { id:"i-ms",   m:3, kind:"degree", title:"WGU M.S. Cybersecurity & Information Assurance", cost:10250, why:"Security depth is what separates a $180k IT director from a $230k one." },
+      { id:"i-fork", m:5, kind:"detour", title:"Stay or move?", options:[
+        { t:"Stay at the nonprofit", d:"Nonprofit pay runs about 12% below the market, which implies about $174k at the Philly mid. Unlikely to reach $200k." },
+        { t:"Move to a for-profit or enterprise", d:"Philly IT director mid is $197k and the high is $236k. Ask for the high with CISSP plus AI infrastructure." } ] },
+      { id:"i-dir",  m:6, kind:"job", title:"Director of IT, for-profit", pay:197355, src:SRC.rhCiso, srcNote:"RH 2027 Philly mid", why:"Negotiate to at least $200k; the 75th percentile for Philly IT managers is $217k (BLS)." },
+      { id:"i-vp",   m:30, kind:"job", title:"VP of IT", pay:233640, src:RH, srcNote:"RH 2027 Philly mid", why:"The next rung; CIO is $307k at the Philly mid." },
+    ] },
+};
+const GOAL = 200000;
+
+function msDate(m, fin) {
+  if (m === null) return "This week";
+  if (m === "start") return fmt(new Date(S.start + "T00:00"));
+  return fmt(addMonths(fin, m));
+}
+
+function roadItem(x, fin, here, opts = {}) {
+  const done = !!S.ms[x.id];
+  const cls = [x.kind === "job" ? "job" : "", x.kind === "fork" || x.kind === "detour" ? "fork-node" : "", done ? "done" : "", here === x.id ? "here" : "", x.goal ? "goal" : ""].join(" ");
+  let side = "";
+  if (x.kind === "job") side = `<span class="pay">${x.pay ? "$" + Math.round(x.pay/1000) + "k" : x.payText}</span><a class="small" href="${x.src}" target="_blank" rel="noopener">${x.srcNote}</a>`;
+  else if (x.cost) side = `<span class="small muted">$${x.cost.toLocaleString()}</span>`;
+  const check = x.kind === "detour" ? "" : `<label class="checkbox"><input type="checkbox" data-ms="${x.id}" ${done?"checked":""}>${x.kind === "job" ? "Hired" : "Done"}</label>`;
+  let why = x.why || "";
+  if (x.kind === "detour") {
+    const pick = S.choice[x.id];
+    why = `<div class="choice">` + x.options.map((o,i) => `<div style="${pick===i?"box-shadow:inset 0 0 0 2px var(--primary);background:var(--surface-lowest)":""}"><b>${o.t}</b>${o.d}
+      <div style="margin-top:6px"><button class="btn ${pick===i?"filled":"tonal"}" style="height:32px;padding:0 12px;font-size:13px" data-choose="${x.id}:${i}">${pick===i?"Chosen":"Choose this"}</button></div></div>`).join("") + `</div>`;
+  }
+  return `<li class="${cls}"><div class="node"><i></i></div>
+    <div class="body"><div class="when">${msDate(x.m, fin)}${here === x.id ? `<span class="tag t-acc here-tag">You are here</span>` : ""}</div>
+      <div class="what">${x.title}</div><div class="why">${why}</div></div>
+    <div class="side">${side}${check}</div></li>`;
+}
+
 function renderCareer() {
   const c = calcFor(S.track), fin = c.finish;
-  const route = [
-    { when:"Now", title:"Let AWS Cloud Practitioner lapse on Nov 19", why:"The General track doesn't use it. Solutions Architect – Associate replaces it later if you want AWS on the résumé.", cost:0 },
-    { when:`Jan 1 → ${fmt(fin)}`, title:"Speedrun the B.S. Cloud & Network Engineering", why:"Earns the A+ exams on the way. Read for CISSP lightly in the evenings; it overlaps with Security+ and your NIST work.", cost:c.cost },
-    { when:`${fmt(addMonths(fin,1))} – ${fmt(addMonths(fin,2))}`, title:"Pass the CISSP", why:"The highest-value step. You qualify on experience. Study the outline that takes effect Apr 15, 2027. Endorsement by another CISSP comes after the exam.", cost:749 },
-    { when:`${fmt(addMonths(fin,3))} – ${fmt(addMonths(fin,9))}`, title:"WGU M.S. Cybersecurity and Information Assurance", why:"One or two terms at speedrun pace. Use its vouchers for CySA+, PenTest+, CISM and AAISM. With the CISSP already active, AAISM is open to you straight away.", cost:MSCSIA_TERM * 2, costNote:"2 terms; 1 if you go fast" },
-    { when:"Alongside the master's", title:"Microsoft SC-300, then SC-100", why:"Turns your Entra ID and Defender work into Microsoft's top security credential.", cost:330 },
-    { when:"Alongside the master's", title:"Google Cloud: Associate Cloud Engineer → Cloud Security Engineer → Agentic Architect", why:"Adds a third cloud and the newest agent-architecture cert, which matches the MCP infrastructure you already run. Renew Agentic Architect yearly.", cost:525 },
-    { when:"2028", title:"Pick your AI depth", why:"For governance: IAPP AIGP. For hands-on credibility: Georgia Tech OMSCS (Machine Learning) part-time, after brushing up on algorithms and linear algebra. Take ISC2's AI security cert when it launches.", cost:null, costNote:"optional" },
-  ];
-  const total = route.reduce((a,r) => a + (r.cost || 0), 0);
-  $("#careerSub").innerHTML = `A route to AI infrastructure and security leadership. Degree by <b>${fmt(fin)}</b>, CISSP by <b>${fmt(addMonths(fin,2))}</b>, master's and AI security credential by <b>${fmt(addMonths(fin,9))}</b>. Core route about <b>$${total.toLocaleString()}</b>, degree included.`;
-  $("#careerRoute").innerHTML = `<div class="panel-head"><h2>The route</h2></div><ol class="steps rows">` + route.map((r,i) => `
-    <li class="step"><div class="k">${i+1}</div><div><div class="when">${r.when}</div><div class="what">${r.title}</div><div class="why">${r.why}</div></div>
-    <div class="num" style="text-align:right;font-weight:560;white-space:nowrap">${r.cost ? "$" + r.cost.toLocaleString() : r.cost === 0 ? "$0" : "–"}${r.costNote ? `<div class="small muted" style="font-weight:400">${r.costNote}</div>` : ""}</div></li>`).join("") + `</ol>`;
+  S.ms = S.ms || {}; S.choice = S.choice || {}; S.road = S.road || "sec";
+  const road = ROADS[S.road];
+  const firstGoalJob = road.ms.find(x => x.kind === "job" && (x.pay || 0) >= GOAL) || road.ms.find(x => x.kind === "job" && !x.pay);
+  // trunk "here" = first unchecked; if trunk done, first unchecked on chosen road
+  const order = [...TRUNK, ...road.ms.filter(x => x.kind !== "detour")];
+  const here = (order.find(x => !S.ms[x.id]) || {}).id;
+  const cur = +S.salary || 0;
+  const goalDate = firstGoalJob ? addMonths(fin, firstGoalJob.m) : null;
+  const roadCost = [...TRUNK, ...road.ms].reduce((a,x) => a + (x.cost || 0), 0) + c.cost;
 
+  $("#careerSub").innerHTML = `Your road: <b>${road.name}</b>. ${firstGoalJob ? `First $200k-plus role, <b>${firstGoalJob.title}</b>, targeted for <b>${fmt(goalDate)}</b>.` : ""} Credentials on this road cost about <b>$${roadCost.toLocaleString()}</b>, degree included.`;
+
+  const meterPct = Math.min(100, cur / GOAL * 100);
+  const nextJob = road.ms.find(x => x.kind === "job" && !S.ms[x.id]);
+  const meter = `<div class="panel-head"><h2>Where you stand</h2>
+      <label class="salary-in small muted">Your current base<input type="number" id="salaryIn" min="0" step="1000" placeholder="e.g. 150000" value="${cur || ""}" aria-label="Current base salary in dollars"></label></div>
+    <div class="meter"><div>
+      <div class="big num">${cur ? `$${cur.toLocaleString()}` : "Add your salary"}</div>
+      <div class="muted small">${cur ? (cur >= GOAL ? "You're past $200k." : `$${(GOAL - cur).toLocaleString()} to go${nextJob ? `. Next pay step: ${nextJob.title} at ${nextJob.pay ? "$" + Math.round(nextJob.pay/1000) + "k" : nextJob.payText}, ${fmt(addMonths(fin, nextJob.m))}.` : "."}`) : "It's stored only in this browser."}</div>
+    </div></div>
+    <div class="meter-bar" aria-hidden="true"><div class="seg wave" style="flex-basis:${meterPct.toFixed(1)}%"></div><div class="rest"></div><div class="stop"></div></div>
+    <div class="meter-scale"><span>$0</span><span>$100k</span><span>$200k</span></div>`;
+
+  const trunk = `<h2 style="margin:28px 0 14px">Shared road</h2><ol class="road">${TRUNK.map(x => roadItem(x, fin, here)).join("")}
+    <li class="fork-node ${here && !TRUNK.some(t=>t.id===here) ? "" : ""}"><div class="node"><i></i></div><div class="body"><div class="when">${msDate(2, fin)}</div><div class="what">Fork: choose your road</div><div class="why">Four ways to $200k. Pick one to follow; the others stay visible so you can switch.</div></div><div class="side"></div></li></ol>`;
+
+  const keys = Object.keys(ROADS);
+  const lanes = `<div class="cbg laneSeg" role="group" aria-label="Road">${keys.map(k => `<button data-road="${k}" class="${S.road===k?"on":""}"><span class="ms" aria-hidden="true">check</span>${ROADS[k].name.split(",")[0].split(" ")[0]}</button>`).join("")}</div>
+    <div class="lanes" style="--n:${keys.length}">` + keys.map(k => { const r = ROADS[k]; const on = S.road === k;
+      return `<div class="lane ${on?"on":""}" data-road-lane="${k}">
+        <div class="lane-h"><div class="nm">${r.name}</div><div class="role">${r.role}</div>
+          <div class="band">$${Math.round(r.band[1]/1000)}k <small>median · $${Math.round(r.band[0]/1000)}k–$${Math.round(r.band[2]/1000)}k</small></div>
+          <div class="small"><a href="${r.bandSrc}" target="_blank" rel="noopener">${r.bandNote}</a></div>
+          <div class="tags"><span class="tag ${r.fit[1]}">${r.fit[0]}</span></div>
+          ${on ? `<p class="small muted" style="margin:8px 0 0">${r.blurb}</p>` : ""}</div>
+        <button class="btn tonal lane-pick" data-road="${k}">Take this road</button>
+        <ol class="road">${r.ms.map(x => roadItem(x, fin, on ? here : null)).join("")}
+          ${(() => { const g = r.ms.find(x => x.kind === "job" && ((x.pay||0) >= GOAL || !x.pay)); return g ? `<li class="goal ${S.ms[g.id]?"done":""}"><div class="node"><i></i></div><div class="body"><div class="when">${fmt(addMonths(fin, g.m))}</div><div class="what">$200k reached</div><div class="why">as ${g.title}</div></div><div class="side"></div></li>` : ""; })()}
+        </ol></div>`; }).join("") + `</div>`;
+
+  $("#careerRoute").innerHTML = meter + trunk + `<h2 style="margin:8px 0 14px">The roads</h2>` + lanes +
+    `<div class="choice" style="margin-top:16px"><div><b>Side road on any route: fractional vCISO or AI-security advising</b>Vendors quote about $200–$300 an hour. At $200 an hour, $200k takes 1,000 billable hours a year, so treat it as extra income, not the main road. (Vendor pricing only; no independent survey exists.)</div></div>`;
   const groups = [...new Set(CERTS.map(x => x.g))];
   $("#careerCerts").innerHTML = `<div class="panel-head"><h2>Certification map</h2><span class="muted small">Exam prices in USD, checked Nov 7, 2026</span></div>
     <div class="tablewrap"><table class="stack"><tr><th>Certification</th><th>Priority</th><th class="r">Cost</th><th>For you</th></tr>` +
@@ -1072,11 +1273,11 @@ function renderCareer() {
     MASTERS.map(m => `<tr><td><a href="${m.src}" target="_blank" rel="noopener">${m.name}</a></td><td><span class="tag ${m.cls}">${m.verdict}</span></td><td class="small" style="white-space:nowrap">${m.cost}</td><td class="small">${m.fit}</td></tr>`).join("") +
     `</table></div>`;
 
-  $("#careerNotes").innerHTML = `<h2 style="margin-bottom:12px">Why this order</h2>
-    <p><b>CISSP before the master's.</b> It's the credential security-leadership job posts ask for, and with it active, the AAISM voucher in the master's is usable on day one.</p>
-    <p><b>WGU for the master's, not an AI-only degree.</b> WGU doesn't offer an M.S. in AI. The cybersecurity master's is the fastest credible option you can start right away, and it bundles four certs. There's no accelerated path from this bachelor's, so it starts after you graduate.</p>
-    <p><b>Agent and cloud certs in the gaps.</b> They're single exams you can schedule around terms. Google's Agentic Architect is new, so treat it as a signal of current skill and plan to renew it yearly.</p>
-    <p class="small muted">Checks still to make: WGU hasn't confirmed whether any BSCNE course carries into a master's, and Foundations of Computer Science's cost and length aren't published. Confirm ITIL v5 and the CISSP domain fit with WGU and ISC2.</p>`;
+  $("#careerNotes").innerHTML = `<h2 style="margin-bottom:12px">Where the numbers come from</h2>
+    <p><b>Salaries are base pay, mostly Robert Half's 2027 Salary Guide for Philadelphia</b>, which runs about 15–18% above its national figures. Robert Half publishes low, mid and high levels, not true percentiles. Architect pay is from the IANS 2025 staff study; CISO total pay from IANS/Artico 2025; tech total pay from Levels.fyi.</p>
+    <p><b>Nonprofit discount:</b> a 2026 Census Bureau working paper finds nonprofit workers earn about 12% less across all occupations. There's no IT-specific figure, so the "stay" options use that as an estimate.</p>
+    <p><b>Remote pay:</b> no source publishes remote bands. National figures on Levels.fyi run well above Philadelphia's, which suggests remote roles paid on national bands beat local offers. That's an inference, not a measurement.</p>
+    <p class="small muted">Researched Nov 10, 2026. Certification holders earn more on average, but those surveys show correlation, not that the cert causes the raise. Re-check salaries before you negotiate.</p>`;
 }
 
 let lastTab = null;
@@ -1095,7 +1296,7 @@ function renderAll() {
    EVENTS
    ============================================================== */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-track],[data-pace],[data-pick],[data-goto],[data-filter],[data-target],[data-plan-alt]");
+  const t = e.target.closest("[data-tab],[data-track],[data-pace],[data-pick],[data-goto],[data-filter],[data-target],[data-plan-alt],[data-road],[data-choose],[data-road-lane]");
   if (!t) return;
   if (t.dataset.tab) S.tab = t.dataset.tab;
   if (t.dataset.goto) { S.tab = t.dataset.goto; if (t.dataset.goto === "courses") S.filter = "todo"; window.scrollTo({ top:0 }); }
@@ -1105,6 +1306,9 @@ document.addEventListener("click", e => {
   if (t.dataset.pace) S.pace = +t.dataset.pace;
   if (t.dataset.target) S.target = +t.dataset.target;
   if (t.dataset.planAlt) S.sophiaPlan[t.dataset.planAlt] = true;
+  if (t.dataset.road) S.road = t.dataset.road;
+  else if (t.dataset.roadLane && S.road !== t.dataset.roadLane && !e.target.closest("input,label,a,button")) S.road = t.dataset.roadLane;
+  if (t.dataset.choose) { const [k,i] = t.dataset.choose.split(":"); S.choice[k] = +i; }
   save(); renderAll();
 });
 document.addEventListener("keydown", e => {
@@ -1116,6 +1320,8 @@ document.addEventListener("change", e => {
   if (t.matches(".st")) { if (t.value === "__auto") delete S.status[t.dataset.course]; else S.status[t.dataset.course] = t.value; }
   else if (t.dataset.sophia) S.sophiaPlan[t.dataset.sophia] = t.checked;
   else if (t.dataset.step) S.steps[t.dataset.step] = t.checked;
+  else if (t.dataset.ms) S.ms[t.dataset.ms] = t.checked;
+  else if (t.id === "salaryIn") S.salary = Math.max(0, +t.value || 0);
   else if (t.dataset.finish) { if (t.checked) S.status[t.dataset.finish] = "transfer"; }
   else if (t.dataset.pass) { if (t.checked) S.status[t.dataset.pass] = "done"; else delete S.status[t.dataset.pass]; }
   else if (t.id === "startDate" && t.value) S.start = t.value;
@@ -1134,7 +1340,7 @@ $("#restoreBtn").onclick = () => {
   try { S = Object.assign({}, DEFAULTS, JSON.parse(decodeURIComponent(escape(atob(txt.trim()))))); S.steps = S.steps || {}; save(); renderAll(); }
   catch { alert("That backup code didn't work."); }
 };
-$("#resetBtn").onclick = () => { if (confirm("Reset all progress and settings?")) { S = { ...DEFAULTS, status:{}, sophiaPlan:{}, steps:{} }; save(); renderAll(); } };
+$("#resetBtn").onclick = () => { if (confirm("Reset all progress and settings?")) { S = { ...DEFAULTS, status:{}, sophiaPlan:{}, steps:{}, ms:{}, choice:{}, road:"sec" }; save(); renderAll(); } };
 
 renderAll();
 </script>
